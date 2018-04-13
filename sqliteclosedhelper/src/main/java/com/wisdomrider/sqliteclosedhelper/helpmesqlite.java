@@ -17,16 +17,7 @@ import java.util.Date;
 
 public class helpmesqlite extends SQLiteOpenHelper {
     public Context context;
-    public String TEXT="TEXT";
-    public String BLOB="BLOB";
-    public String INTEGER="INTEGER";
-    public String NOT_NULL="NOT NULL";
-    public String DEFAULT="DEFAULT";
-    public String DATETIME="DATETIME";
     public  String table;
-    ArrayList var_name=new ArrayList();
-    ArrayList type=new ArrayList();
-    ArrayList params=new ArrayList();
 
     public helpmesqlite(Context context,String name) {
         super(context,name, null, 1);
@@ -37,12 +28,18 @@ public class helpmesqlite extends SQLiteOpenHelper {
     }
 
 
+    public void query(String query){
+        SQLiteDatabase db=this.getWritableDatabase();
+        db.execSQL(query);
+
+    }
+
 
 
 
     @Override
     public void onCreate(SQLiteDatabase sqLiteDatabase) {
-//        sqLiteDatabase.execSQL("create table "+table+" (_ID INTEGER PRIMARY KEY AUTOINCREMENT,DATA TEXT,ID TEXT,READ INTEGER,time DATETIME)");
+//         sqLiteDatabase.execSQL("create table sad"+" (_ID INTEGER PRIMARY KEY AUTOINCREMENT,DATA TEXT,ID TEXT,READ INTEGER,time DATETIME)");
 
     }
 

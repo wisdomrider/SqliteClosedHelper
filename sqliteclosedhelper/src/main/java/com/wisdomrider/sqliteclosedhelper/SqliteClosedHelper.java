@@ -2,45 +2,22 @@ package com.wisdomrider.sqliteclosedhelper;
 // Created by WisdomRider (Avishek Adhikari) On 4/12/2018
 
 import android.content.Context;
+import android.widget.Toast;
 
 import java.net.Inet4Address;
 import java.util.ArrayList;
 import java.util.HashMap;
 
 public class SqliteClosedHelper implements Interface {
-    Context context;
-    String DATABASENAME;
-    String TABLENAME;
-ArrayList<Fields > fields=new ArrayList<>();
-    @Override
-    public SqliteClosedHelper build() {
-        return this;
-    }
-
-    @Override
-    public SqliteClosedHelper build(Context context) {
+    private Context context;
+    private String DATABASENAME;
+    private String TABLENAME;
+    private ArrayList<Fields> fields = new ArrayList<>();
+    helpmesqlite Sqlite;
+    public SqliteClosedHelper(Context context, String dbname) {
         this.context = context;
-        return this;
-    }
-
-    @Override
-    public SqliteClosedHelper build(Context c, String DBNAME) {
-        build(c);
-        this.DATABASENAME = DBNAME;
-        return this;
-    }
-
-    @Override
-    public SqliteClosedHelper build(Context c, String DBNAME, String TABLENAME) {
-        build(c, DBNAME);
-        this.TABLENAME = TABLENAME;
-        return this;
-    }
-
-    @Override
-    public SqliteClosedHelper setDatabaseName(String name) {
-        this.DATABASENAME = name;
-        return this;
+        this.DATABASENAME = dbname;
+        Sqlite=new helpmesqlite(context,dbname);
     }
 
     @Override
@@ -50,38 +27,36 @@ ArrayList<Fields > fields=new ArrayList<>();
     }
 
     @Override
-    public SqliteClosedHelper setTableFields(String name, int type) {
-     fields.add(new Fields(TABLENAME,name,type))
+    public SqliteClosedHelper query(String data) {
+        Sqlite.query(data);
+        return this;
+    }
+
+
+    @Override
+    public SqliteClosedHelper setTableFields(String name, TYPE type) {
+        fields.add(new Fields(name, type, Wisdom.NONE()));
+        return this;
+    }
+
+
+    @Override
+    public SqliteClosedHelper setTableFields(String name, TYPE type, PARAMETERS parameters) {
+        fields.add(new Fields(name, type, parameters));
         return this;
     }
 
     @Override
-    public SqliteClosedHelper setTableFields(String name, int type, String defaultvalue) {
-        setTableFields(name, type);
-        defaultvalues.add(defaultvalue);
-        return this;
+    public void create() {
+        String var_name="";
+        for(int a=0;a<fields.size();a++){
+            Fields field=fields.get(a);
+            var_name=var_name+field.getFieldname()+" "+field.getType()+" "+field.getParameters()+",";
+        }
+        var_name=var_name.substring(0,var_name.length()-1);
+        query("create table if not exists "+TABLENAME+ " ("+var_name+")");
+        Toast.makeText(context, "create table "+TABLENAME+ " ("+var_name+")", Toast.LENGTH_SHORT).show();
     }
 
-    @Override
-    public SqliteClosedHelper setTableFields(String name, int type, int defaultvalue) {
-        setTableFields(name, type);
-        defaultvaluesint.add(defaultvalue);
-        return this;
-    }
 
-    @Override
-    public SqliteClosedHelper setTableFields(String name, int type, int defaultvalue, int parameters) {
-        setTableFields(name, type);
-        defaultvaluesint.add(defaultvalue);
-        Parameters.add(parameters);
-        return this;
-    }
-
-    @Override
-    public SqliteClosedHelper setTableFields(String name, int type, String defaultvalue, int parameters) {
-        setTableFields(name, type);
-        defaultvalues.add(defaultvalue);
-        Parameters.add(parameters);
-        return this;
-    }
 }
