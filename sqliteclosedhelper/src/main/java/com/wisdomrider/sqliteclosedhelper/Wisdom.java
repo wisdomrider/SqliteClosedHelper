@@ -19,7 +19,7 @@ public  class Wisdom  {
     public  static PARAMETERS NOTNULL(){
         return  new PARAMETERS("not null ");
     }
-    public  static PARAMETERS CUSTOM(String CUSTOMPARAMETER){
+    public  static PARAMETERS CUSTOMPARAMETER(String CUSTOMPARAMETER){
         return  new PARAMETERS(CUSTOMPARAMETER+" ");
     }
 

@@ -13,6 +13,8 @@ interface  Interface{
     void renameTable(String oldname,String newname);
     void dropTable(String tablename);
     void clearAll();
+    boolean ifTableExist(String TABLENAME);
+    boolean isFieldExist(String fieldname,Object value);
     SqliteClosedHelper insertFields(String data,Object value);
     void insert();
     Cursor getAll();

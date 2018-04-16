@@ -13,22 +13,21 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         SqliteClosedHelper helper = new SqliteClosedHelper(this,"sad");
-        helper.setTable("avishesak")
-                .setTableFields("a",Wisdom.TEXT(),Wisdom.NOTNULL())
+        if(!helper.ifTableExist("avi1")){
+            Toast.makeText(this, "xaena", Toast.LENGTH_SHORT).show();
+        }
+
+        helper.setTable("avi1")
+                .setTableFields("id",Wisdom.INTEGER(),Wisdom.PRIMARY_AUTOINCREMENT())
+                .setTableFields("aa",Wisdom.INTEGER(),Wisdom.NOTNULL())
                 .setTableFields("aw",Wisdom.TEXT(),Wisdom.NOTNULL())
                 .setTableFields("ao",Wisdom.TEXT(),Wisdom.NOTNULL())
                 .create()
-                .insertFields("a","aheck")
+                .insertFields("aa",1 )
                 .insertFields("aw","tike")
                 .insertFields("ao","crystal")
                 .insert();
-        helper.updateFields("a","basd")
-                .update("aasddas","aheck");
-        Cursor a=helper.setTable("avishesak")
-                .get("where a='aheck'");
-        while (a.moveToNext()){
-            Toast.makeText(this, a.getString(1), Toast.LENGTH_SHORT).show();
-        }
+
 
 
     }
