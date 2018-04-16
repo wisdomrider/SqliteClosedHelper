@@ -55,18 +55,15 @@ public class helpmesqlite extends SQLiteOpenHelper {
         return dateFormat.format(date);
     }
 
-    public boolean insert(String data,String id,int read,String time){
+    public SQLiteDatabase getDatabase(){
         SQLiteDatabase db=this.getWritableDatabase();
-        ContentValues values=new ContentValues();
-        values.put("DATA",data);
-        values.put("ID",id);
-        if(time.isEmpty()){
-            values.put("time",date());
-        }
-        else{
-            values.put("time",time);
-        }
+        return  db;
+    }
 
+
+
+    public boolean insert(String table,ContentValues values){
+        SQLiteDatabase db=this.getWritableDatabase();
         long result=  db.insert(table,null,values);
         if(result==-1){
             return false;
@@ -88,7 +85,6 @@ public class helpmesqlite extends SQLiteOpenHelper {
 
         return  data;
     }
-
 
     public Cursor getAllData(){
         SQLiteDatabase db=this.getReadableDatabase();
@@ -112,6 +108,7 @@ public class helpmesqlite extends SQLiteOpenHelper {
 
         return false;
     }
+
 
 
     public int getIdbyToken(String token) {

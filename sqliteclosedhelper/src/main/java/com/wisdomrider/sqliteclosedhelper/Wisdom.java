@@ -15,13 +15,20 @@ public  class Wisdom  {
     public static TYPE STRING(){
         return new TYPE("TEXT");
     }
-
+    public  static TYPE CUSTOMTYPE(String CUSTOMPARAMETER){ return  new TYPE(CUSTOMPARAMETER+" "); }
     public  static PARAMETERS NOTNULL(){
-        return  new PARAMETERS("not null");
+        return  new PARAMETERS("not null ");
+    }
+    public  static PARAMETERS CUSTOM(String CUSTOMPARAMETER){
+        return  new PARAMETERS(CUSTOMPARAMETER+" ");
     }
 
+
     public  static PARAMETERS PRIMARY_AUTOINCREMENT(){
-        return  new PARAMETERS("PRIMARY KEY AUTOINCREMENT");
+        return  new PARAMETERS("PRIMARY KEY AUTOINCREMENT ");
+    }
+    public  static PARAMETERS PRIMARY(){
+        return  new PARAMETERS("PRIMARY ");
     }
     public  static PARAMETERS NONE(){
         return  new PARAMETERS("");

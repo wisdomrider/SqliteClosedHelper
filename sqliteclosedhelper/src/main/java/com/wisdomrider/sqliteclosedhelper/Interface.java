@@ -1,14 +1,25 @@
 package com.wisdomrider.sqliteclosedhelper;
 // Created by WisdomRider (Avishek Adhikari) On 4/13/2018
 
-import android.content.Context;
+
+import android.database.Cursor;
 
 interface  Interface{
     SqliteClosedHelper setTable(String name);
-    SqliteClosedHelper query(String data);
+    void query(String data);
     SqliteClosedHelper setTableFields(String name,TYPE type);
     SqliteClosedHelper setTableFields(String name,TYPE type,PARAMETERS parameters);
-    void create();
-
+    SqliteClosedHelper create();
+    void renameTable(String oldname,String newname);
+    void dropTable(String tablename);
+    void clearAll();
+    SqliteClosedHelper insertFields(String data,Object value);
+    void insert();
+    Cursor getAll();
+    Cursor get(String query);
+    Cursor getWhere(String field,String value);
+    Cursor getWhere(String field,int value);
+    SqliteClosedHelper updateFields(String  name,Object value);
+    void update(String where,Object value);
 
 }
