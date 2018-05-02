@@ -17,11 +17,12 @@ interface  Interface{
     boolean isFieldExist(String fieldname,Object value);
     SqliteClosedHelper insertFields(String data,Object value);
     void insert();
+    SqliteClosedHelper clearAllFields();
     Cursor getAll();
     Cursor get(String query);
     Cursor getWhere(String field,String value);
     Cursor getWhere(String field,int value);
     SqliteClosedHelper updateFields(String  name,Object value);
     void update(String where,Object value);
-
+    void setSharedPreferences(String name);
 }

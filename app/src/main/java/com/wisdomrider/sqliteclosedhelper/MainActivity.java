@@ -1,5 +1,6 @@
 package com.wisdomrider.sqliteclosedhelper;
 
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -16,7 +17,6 @@ public class MainActivity extends AppCompatActivity {
         if(!helper.ifTableExist("avi1")){
             Toast.makeText(this, "xaena", Toast.LENGTH_SHORT).show();
         }
-
         helper.setTable("avi1")
                 .setTableFields("id",Wisdom.INTEGER(),Wisdom.PRIMARY_AUTOINCREMENT())
                 .setTableFields("aa",Wisdom.INTEGER(),Wisdom.NOTNULL())
@@ -27,7 +27,10 @@ public class MainActivity extends AppCompatActivity {
                 .insertFields("aw","tike")
                 .insertFields("ao","crystal")
                 .insert();
-
+        helper.setTable("avi1").clearAllFields();
+        helper.sharedPreferencesEditor.putInt("a",1);
+        Toast.makeText(this, helper.sharedPreferences.getInt("a",0)+"", Toast.LENGTH_SHORT).show();
+        helper.sharedPreferencesEditor.apply();
 
 
     }

@@ -4,6 +4,7 @@ package com.wisdomrider.sqliteclosedhelper;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
@@ -15,6 +16,8 @@ public class SqliteClosedHelper implements Interface {
     private String DATABASENAME;
     private String TABLENAME;
     private SQLiteDatabase database;
+    SharedPreferences sharedPreferences;
+    SharedPreferences.Editor sharedPreferencesEditor;
     private ArrayList<Fields> fields = new ArrayList<>();
     private ArrayList<Insert> insert = new ArrayList<>();
     private ArrayList<Insert> update = new ArrayList<>();
@@ -24,6 +27,8 @@ public class SqliteClosedHelper implements Interface {
         this.context = context;
         this.DATABASENAME = dbname;
         Sqlite = new helpmesqlite(context, dbname);
+        sharedPreferences=context.getSharedPreferences("SqliteClosedHelper_data",0);
+        sharedPreferencesEditor=sharedPreferences.edit();
         database = Sqlite.getDatabase();
 
     }
@@ -117,6 +122,12 @@ public class SqliteClosedHelper implements Interface {
 
     }
 
+    @Override
+    public void setSharedPreferences(String name) {
+        sharedPreferences=context.getSharedPreferences(name,0);
+        sharedPreferencesEditor=sharedPreferences.edit();
+    }
+
 
     @Override
     public void clearAll() {
@@ -193,6 +204,13 @@ public class SqliteClosedHelper implements Interface {
         database.insertOrThrow(TABLENAME, null, contentValues);
 
     }
+
+    @Override
+    public SqliteClosedHelper clearAllFields() {
+        database.execSQL("delete from "+ TABLENAME);
+        return this;
+    }
+
 
 
     @Override
