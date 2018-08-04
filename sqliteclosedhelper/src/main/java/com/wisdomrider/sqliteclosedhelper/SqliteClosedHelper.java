@@ -16,7 +16,7 @@ public class SqliteClosedHelper implements Interface {
     private String DATABASENAME;
     private String TABLENAME;
     private SQLiteDatabase database;
-    SharedPreferences sharedPreferences;
+    public  SharedPreferences sharedPreferences;
     SharedPreferences.Editor sharedPreferencesEditor;
     private ArrayList<Fields> fields = new ArrayList<>();
     private ArrayList<Insert> insert = new ArrayList<>();
@@ -45,6 +45,11 @@ public class SqliteClosedHelper implements Interface {
     @Override
     public void query(String data) {
         database.execSQL(data);
+    }
+
+    @Override
+    public void close() {
+        database.close();
     }
 
 
@@ -130,20 +135,23 @@ public class SqliteClosedHelper implements Interface {
 
 
     @Override
-    public void clearAll() {
+    public SqliteClosedHelper clearAll() {
         fields.clear();
+        update.clear();
+        insert.clear();
+        return this;
     }
 
     @Override
     public boolean ifTableExist(String table1) {
-            try {
-                database.rawQuery("SELECT * FROM " + table1,null);
-                return true;
-            } catch (SQLException e) {
-                return false;
-            }
+        try {
+            database.rawQuery("SELECT * FROM " + table1,null);
+            return true;
+        } catch (SQLException e) {
+            return false;
+        }
 
-     }
+    }
 
     @Override
     public boolean isFieldExist(String fieldname, Object value) {
@@ -178,7 +186,7 @@ public class SqliteClosedHelper implements Interface {
 
     public int check(Object data){
         if (data instanceof Integer) {
-           return 1;
+            return 1;
         } else if (data instanceof String) {
             return  2;
         } else {
@@ -202,7 +210,7 @@ public class SqliteClosedHelper implements Interface {
         }
 
         database.insertOrThrow(TABLENAME, null, contentValues);
-
+        clearAll();
     }
 
     @Override
@@ -210,6 +218,7 @@ public class SqliteClosedHelper implements Interface {
         database.execSQL("delete from "+ TABLENAME);
         return this;
     }
+
 
 
 
@@ -234,8 +243,17 @@ public class SqliteClosedHelper implements Interface {
 
     @Override
     public Cursor get(String query) {
+
         Cursor res = database.rawQuery("select * from " + TABLENAME + " " + query, null);
         return res;
+    }
+
+    @Override
+    public SqliteClosedHelper delete(String where, Object Value) {
+
+        database.execSQL("delete from "+ TABLENAME+" where "+where+"= '"+Value+"' ;");
+
+        return this;
     }
 
 
