@@ -34,6 +34,7 @@ public class SqliteClosedHelper implements Interface {
     }
 
 
+
     @Override
     public SqliteClosedHelper setTable(String name) {
         this.TABLENAME = name;
@@ -112,8 +113,14 @@ public class SqliteClosedHelper implements Interface {
                 contentValues.put(data.getName(), (Integer) data.getValue());
             } else if (data.getValue() instanceof String) {
                 contentValues.put(data.getName(), data.getValue().toString());
-            } else {
-                throw new Error("Object not recognized must be int or string ");
+            } else if (data.getValue() instanceof Long) {
+                contentValues.put(data.getName(), (long)data.getValue());
+            }
+             else if (data.getValue() instanceof Float) {
+                contentValues.put(data.getName(), (float)data.getValue());
+            }
+            else {
+                throw new Error("Object not recognized must be long, int or string ");
             }
         }
         String valuee;
@@ -177,6 +184,12 @@ public class SqliteClosedHelper implements Interface {
     }
 
     @Override
+    public Cursor getField(String key) {
+        if (database==null) return null;
+        return  database.rawQuery("select "+key+" from "+TABLENAME,null);
+    }
+
+    @Override
     public SqliteClosedHelper insertFields(String data, Object value) {
         insert.add(new Insert(data, value));
         return this;
@@ -204,7 +217,14 @@ public class SqliteClosedHelper implements Interface {
                 contentValues.put(data.getName(), (Integer) data.getValue());
             } else if (data.getValue() instanceof String) {
                 contentValues.put(data.getName(), data.getValue().toString());
-            } else {
+            }
+            else if (data.getValue() instanceof Long) {
+                contentValues.put(data.getName(), (long)data.getValue());
+            }
+            else if (data.getValue() instanceof Float) {
+                contentValues.put(data.getName(), (float)data.getValue());
+            }
+            else {
                 throw new Error("Object not recognized must be int or string ");
             }
         }
