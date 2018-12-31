@@ -21,7 +21,18 @@ Step 2. Add the dependency
 	}
 
 
-	
+# How to Implement ?
+
+
+
+Initialize First
+
+
+       SqliteClosedHelper  sqliteClosedHelper=new SqliteClosedHelper(context,"dbname");
+
+
+
+
 
 
 
