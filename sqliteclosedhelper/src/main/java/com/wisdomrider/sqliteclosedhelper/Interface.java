@@ -4,6 +4,8 @@ package com.wisdomrider.sqliteclosedhelper;
 
 import android.database.Cursor;
 
+import java.util.ArrayList;
+
 interface Interface {
     SqliteClosedHelper setTable(String name);
 
@@ -51,7 +53,14 @@ interface Interface {
 
     void setSharedPreferences(String name);
 
-    <T> T createTableFromClass(T table);
+    <T> SqliteClosedHelper createTableFromClass(T table);
+
+    <T> SqliteClosedHelper insertTableFromClass(T table);
+
+    <T> ArrayList<T> getAll(T table);
+
+    <T> ArrayList<T> getWhere(T table);
+
 
     TYPE getType(Class<?> type);
 }

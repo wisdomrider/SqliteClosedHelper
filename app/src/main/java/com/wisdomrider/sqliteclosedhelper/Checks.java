@@ -1,8 +1,28 @@
 package com.wisdomrider.sqliteclosedhelper;
 
 public class Checks {
-    private String first,lastname;
-    private Integer age;
+    private String first, lastname;
+    private int age;
+    private float hell;
+
+    public float getHell() {
+        return hell;
+    }
+
+    public void setHell(float hell) {
+        this.hell = hell;
+    }
+
+    public long getOops() {
+        return oops;
+    }
+
+    public void setOops(long oops) {
+        this.oops = oops;
+    }
+
+    private long oops;
+
 
     public String getFirst() {
         return first;

@@ -8,7 +8,7 @@ import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
-import android.widget.Toast;
+import android.util.Log;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -266,29 +266,8 @@ public class SqliteClosedHelper implements Interface {
         return this;
     }
 
-//    Field[] fields1;
-//
-//    public <T> T createTable(T check) {
-//        fields1 = check.getClass().getFields();
-//
-//
-//        for (int i = 0; i < fields1.length - 2; i++) {
-//
-//            try {
-//                Object o = fields1[i].get(check);
-//                Log.e("ERR", o.toString());
-//            } catch (IllegalAccessException e) {
-//                Toast.makeText(context, "ex", Toast.LENGTH_SHORT).show();
-//            }
-//        }
-//
-//        return check;
-//
-//    }
-//
-
     @Override
-    public <T> T createTableFromClass(T table) {
+    public <T> SqliteClosedHelper createTableFromClass(T table) {
         setTable(table.getClass().getSimpleName());
         clearAll();
         setTableFields(Constants.DEFAULT_ID, Wisdom.INTEGER(), Wisdom.PRIMARY_AUTOINCREMENT());
@@ -298,40 +277,166 @@ public class SqliteClosedHelper implements Interface {
             setTableFields(o, getType(items[i].getType()));
         }
         create();
-        return table;
+        return this;
     }
 
     @Override
-    public TYPE getType(Class<?> type) {
-
-        TYPE getType;
-        if(type.isInstance(Integer.class)){
-            Toast.makeText(context, "sadasd", Toast.LENGTH_SHORT).show();
-            return Wisdom.INTEGER();
+    public <T> SqliteClosedHelper insertTableFromClass(T table) {
+        setTable(table.getClass().getSimpleName());
+        clearAll();
+        Field[] items = table.getClass().getDeclaredFields();
+        for (int i = 0; i < items.length - 2; i++) {
+            try {
+                items[i].setAccessible(true);
+                String parameter = items[i].getName();
+                Object object = items[i].get(table);
+                insertFields(parameter, object);
+            } catch (IllegalAccessException e) {
+                throw new Error(e.getMessage());
+            }
         }
-        else
-            return Wisdom.STRING();
+        insert();
+        return this;
+    }
 
-//        switch (type.toString()) {
-//            case "class java.lang.Double":
-//                getType = Wisdom.CUSTOMTYPE("REAL");
-//                break;
-//            case "class java.lang.Float":
-//                getType = Wisdom.CUSTOMTYPE("REAL");
-//                break;
-//            case "class java.lang.String":
-//                getType = Wisdom.STRING();
-//                break;
-//            case "class java.lang.Integer":
-//                getType = Wisdom.INTEGER();
-//                break;
-//            case "class java.lang.Long":
-//                getType = Wisdom.INTEGER();
-//                break;
-//            default:
-//                throw new Error("Object cannot be initialized on sqlite");
-//
-//        }
-//        return getType;
+
+    @Override
+    public TYPE getType(Class<?> type) {
+        TYPE getType;
+        switch (type.toString()) {
+            case "double":
+                getType = Wisdom.CUSTOMTYPE("REAL");
+                break;
+            case "int":
+                getType = Wisdom.INTEGER();
+                break;
+            case "float":
+                getType = Wisdom.CUSTOMTYPE("REAL");
+                break;
+            case "long":
+                getType = Wisdom.CUSTOMTYPE("REAL");
+                break;
+            case "class java.lang.Double":
+                getType = Wisdom.CUSTOMTYPE("REAL");
+                break;
+            case "class java.lang.Float":
+                getType = Wisdom.CUSTOMTYPE("REAL");
+                break;
+            case "class java.lang.String":
+                getType = Wisdom.STRING();
+                break;
+            case "class java.lang.Integer":
+                getType = Wisdom.INTEGER();
+                break;
+            case "class java.lang.Long":
+                getType = Wisdom.INTEGER();
+                break;
+            default:
+                throw new Error("Object cannot be initialized on sqlite");
+
+        }
+        return getType;
+    }
+
+    @Override
+    public <T> ArrayList<T> getAll(T table) {
+        setTable(table.getClass().getSimpleName());
+        clearAll();
+        ArrayList<T> lists = new ArrayList<>();
+        Cursor cursor = getAll();
+        if (cursor.getCount() == 0) return lists;
+        while (cursor.moveToNext()) {
+            T var = table;
+            Field[] items = var.getClass().getDeclaredFields();
+            for (int i = 0; i < items.length - 2; i++) {
+                items[i].setAccessible(true);
+                try {
+                    items[i].set(var, getItem(items[i].getType(), cursor, i + 1));
+                } catch (IllegalAccessException e) {
+                    throw new Error(e.getMessage());
+                }
+
+            }
+            lists.add(table);
+        }
+
+        return lists;
+    }
+
+    @Override
+    public <T> ArrayList<T> getWhere(T table) {
+        setTable(table.getClass().getSimpleName());
+        clearAll();
+        ArrayList<T> lists = new ArrayList<>();
+        for (Field f : table.getClass().getDeclaredFields()) {
+            try {
+                f.setAccessible(true);
+                if (f.get(table) != null && !f.get(table).equals(0)) {
+                    String query = "select * from " + table.getClass().getSimpleName() + " where " + f.getName() + "='" + f.get(table) + "';";
+                    Cursor cursor = database.rawQuery(query, null);
+                    if (cursor.getCount() == 0) return lists;
+                    while (cursor.moveToNext()) {
+                        T var = table;
+                        Field[] items = var.getClass().getDeclaredFields();
+                        for (int i = 0; i < items.length - 2; i++) {
+                            items[i].setAccessible(true);
+                            try {
+                                items[i].set(var, getItem(items[i].getType(), cursor, i + 1));
+                            } catch (IllegalAccessException e) {
+                                throw new Error(e.getMessage());
+                            }
+
+                        }
+                        lists.add(table);
+                    }
+                    return lists;
+                }
+            } catch (IllegalAccessException e) {
+                throw new Error(e.getMessage());
+            }
+        }
+
+        return lists;
+    }
+
+    private boolean checkType(Object aClass) {
+
+        return aClass instanceof Integer || aClass instanceof Float || aClass instanceof Double;
+    }
+
+    private Object getItem(Class<?> type, Cursor cursor, int i) {
+        Object getType;
+        switch (type.toString()) {
+            case "double":
+                getType = cursor.getDouble(i);
+                break;
+            case "int":
+                getType = cursor.getInt(i);
+                break;
+            case "float":
+                getType = cursor.getFloat(i);
+                break;
+            case "long":
+                getType = cursor.getLong(i);
+                break;
+            case "class java.lang.Double":
+                getType = cursor.getDouble(i);
+                break;
+            case "class java.lang.Float":
+                getType = cursor.getFloat(i);
+                break;
+            case "class java.lang.String":
+                getType = cursor.getString(i);
+                break;
+            case "class java.lang.Integer":
+                getType = cursor.getInt(i);
+                break;
+            case "class java.lang.Long":
+                getType = cursor.getLong(i);
+                break;
+            default:
+                throw new Error("Object cannot be initialized on sqlite");
+        }
+        return getType;
     }
 }
