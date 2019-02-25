@@ -13,25 +13,14 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        SqliteClosedHelper helper = new SqliteClosedHelper(this,"sad");
-        if(!helper.ifTableExist("avi1")){
-            Toast.makeText(this, "xaena", Toast.LENGTH_SHORT).show();
-        }
-        helper.setTable("avi1")
-                .setTableFields("id",Wisdom.INTEGER(),Wisdom.PRIMARY_AUTOINCREMENT())
-                .setTableFields("aa",Wisdom.INTEGER(),Wisdom.NOTNULL())
-                .setTableFields("aw",Wisdom.TEXT(),Wisdom.NOTNULL())
-                .setTableFields("ao",Wisdom.TEXT(),Wisdom.NOTNULL())
-                .create()
-                .insertFields("aa",1 )
-                .insertFields("aw","tike")
-                .insertFields("ao","crystal")
-                .insert();
-        helper.setTable("avi1").clearAllFields();
-        helper.sharedPreferencesEditor.putInt("a",1);
-        Toast.makeText(this, helper.sharedPreferences.getInt("a",0)+"", Toast.LENGTH_SHORT).show();
-        helper.sharedPreferencesEditor.apply();
+        SqliteClosedHelper helper = new SqliteClosedHelper(this, "sad");
 
+
+        Checks checks = new Checks();
+        checks.setAge(10);
+        checks.setFirst("Aviskhek");
+        checks.setLastname("asdjkgasd");
+        helper.createTableFromClass(checks);
 
     }
 }

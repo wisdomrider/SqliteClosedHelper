@@ -50,4 +50,8 @@ interface Interface {
     void update(String where, Object value);
 
     void setSharedPreferences(String name);
+
+    <T> T createTableFromClass(T table);
+
+    TYPE getType(Class<?> type);
 }
