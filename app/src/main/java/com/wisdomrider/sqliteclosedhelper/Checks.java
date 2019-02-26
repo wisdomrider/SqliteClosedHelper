@@ -2,51 +2,89 @@ package com.wisdomrider.sqliteclosedhelper;
 
 public class Checks  {
 
-    private String first, lastname;
-    private int age;
-    private float hell;
+    private String mBiodataphoto;
+    private String mDob;
+    private String mEmail;
+    private String mGender;
+    private String mLicensephoto;
+    private String mLocation;
+    private String mPhone;
+    private String mUsername;
+    private String mUserphoto;
 
-
-    public float getHell() {
-        return hell;
+    public String getBiodataphoto() {
+        return mBiodataphoto;
     }
 
-    public void setHell(float hell) {
-        this.hell = hell;
+    public void setBiodataphoto(String biodataphoto) {
+        mBiodataphoto = biodataphoto;
     }
 
-    public long getOops() {
-        return oops;
+    public String getDob() {
+        return mDob;
     }
 
-    public void setOops(long oops) {
-        this.oops = oops;
+    public void setDob(String dob) {
+
+        mDob = dob;
+
     }
 
-    private long oops;
-
-
-    public String getFirst() {
-        return first;
+    public String getEmail() {
+        return mEmail;
     }
 
-    public void setFirst(String first) {
-        this.first = first;
+    public void setEmail(String email) {
+        mEmail = email;
     }
 
-    public String getLastname() {
-        return lastname;
+    public String getGender() {
+        return mGender;
     }
 
-    public void setLastname(String lastname) {
-        this.lastname = lastname;
+    public void setGender(String gender) {
+        mGender = gender;
     }
 
-    public int getAge() {
-        return age;
+    public String getLicensephoto() {
+        return mLicensephoto;
     }
 
-    public void setAge(int age) {
-        this.age = age;
+    public void setLicensephoto(String licensephoto) {
+        mLicensephoto = licensephoto;
     }
+
+    public String getLocation() {
+        return mLocation;
+    }
+
+    public void setLocation(String location) {
+        mLocation = location;
+    }
+
+    public String getPhone() {
+        return mPhone;
+    }
+
+    public void setPhone(String phone) {
+        mPhone = phone;
+    }
+
+    public String getUsername() {
+        return mUsername;
+    }
+
+    public void setUsername(String username) {
+        mUsername = username;
+    }
+
+    public String getUserphoto() {
+        return mUserphoto;
+    }
+
+    public void setUserphoto(String userphoto) {
+        mUserphoto = userphoto;
+    }
+
+
 }

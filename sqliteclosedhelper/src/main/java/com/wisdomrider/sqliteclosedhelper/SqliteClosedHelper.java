@@ -211,7 +211,7 @@ public class SqliteClosedHelper implements Interface {
             if (data.getValue() instanceof Integer) {
                 contentValues.put(data.getName(), (Integer) data.getValue());
             } else if (data.getValue() instanceof String) {
-                contentValues.put(data.getName(), data.getValue().toString());
+                contentValues.put(data.getName(), (String) data.getValue().toString());
             } else if (data.getValue() instanceof Long) {
                 contentValues.put(data.getName(), (long) data.getValue());
             } else if (data.getValue() instanceof Float) {
@@ -288,7 +288,7 @@ public class SqliteClosedHelper implements Interface {
                 items[i].setAccessible(true);
                 String parameter = items[i].getName();
                 Object object = items[i].get(table);
-                insertFields(parameter, object);
+                checkAndInsert(parameter, object);
             } catch (IllegalAccessException e) {
                 throw new Error(e.getMessage());
             }
@@ -297,6 +297,31 @@ public class SqliteClosedHelper implements Interface {
         return this;
     }
 
+    private void checkAndInsert(String parameter, Object object) {
+
+        if (object instanceof String)
+            insertFields(parameter, (String) object);
+        else if (object instanceof Integer)
+            insertFields(parameter, (Integer) object);
+        else if (object instanceof Double)
+            insertFields(parameter, (Double) object);
+        else if (object instanceof Long)
+            insertFields(parameter, (Long) object);
+
+    }
+
+
+    private void checkAndUpdate(String parameter, Object object) {
+        if (object instanceof String)
+            updateFields(parameter, (String) object);
+        else if (object instanceof Integer)
+            updateFields(parameter, (Integer) object);
+        else if (object instanceof Double)
+            updateFields(parameter, (Double) object);
+        else if (object instanceof Long)
+            updateFields(parameter, (Long) object);
+
+    }
 
     @Override
     public TYPE getType(Class<?> type) {
@@ -400,6 +425,7 @@ public class SqliteClosedHelper implements Interface {
 
     @Override
     public <T> SqliteClosedHelper updateTableFromClass(T table, T key) {
+        setTable(table.getClass().getSimpleName());
         for (Field f : table.getClass().getDeclaredFields()) {
             f.setAccessible(true);
             try {
@@ -408,8 +434,6 @@ public class SqliteClosedHelper implements Interface {
                     Object value = f.get(table);
                     boolean ifExist = isFieldExist(field_name, value);
                     if (ifExist) {
-                        Log.e("CHECK","GOT");
-                        setTable(table.getClass().getSimpleName());
                         clearAll();
                         Field[] items = table.getClass().getDeclaredFields();
                         for (int i = 0; i < items.length - 2; i++) {
@@ -417,12 +441,11 @@ public class SqliteClosedHelper implements Interface {
                                 items[i].setAccessible(true);
                                 String parameter = items[i].getName();
                                 Object object = items[i].get(table);
-                                updateFields(parameter, object);
+                                checkAndUpdate(parameter, object);
                             } catch (IllegalAccessException e) {
                                 throw new Error(e.getMessage());
                             }
                         }
-                        Log.e("CHECK","CALL");
                         update(field_name, value);
 
                     } else {
