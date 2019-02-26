@@ -57,6 +57,8 @@ interface Interface {
 
     <T> SqliteClosedHelper insertTableFromClass(T table);
 
+    <T> SqliteClosedHelper updateTableFromClass(T table,T key);
+
     <T> ArrayList<T> getAll(T table);
 
     <T> ArrayList<T> getWhere(T table);

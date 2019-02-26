@@ -16,17 +16,23 @@ public class MainActivity extends AppCompatActivity {
 
 
         Checks checks = new Checks();
-//        helper.createTableFromClass(checks);
-//        checks.setAge(10);
-//        checks.setFirst("hey");
-//        checks.setHell(1.34234134154f);
-//        checks.setLastname("ASda");
-//        checks.setOops(1);
+        helper.createTableFromClass(checks);
+        checks.setAge(70);
+        checks.setFirst("heya1");
+        checks.setHell(1.34234134154f);
+        checks.setLastname("ASda71");
+        checks.setOops(1);
+
 //        helper.insertTableFromClass(checks);
-//
+
+
         ArrayList<Checks> checks1 = helper.getAll(new Checks());
-        checks.setAge(10);
         ArrayList<Checks> checks2 = helper.getWhere(checks);
+//        Log.e("ERQ!", checks1.get(0).getFirst());
+//        Log.e("ERQ!", checks2.get(0).getFirst());
+
+       helper.updateTableFromClass(checks,checks.getFirst());
+
 
 
     }

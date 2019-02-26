@@ -260,9 +260,7 @@ public class SqliteClosedHelper implements Interface {
 
     @Override
     public SqliteClosedHelper delete(String where, Object Value) {
-
         database.execSQL("delete from " + TABLENAME + " where " + where + "= '" + Value + "' ;");
-
         return this;
     }
 
@@ -399,9 +397,47 @@ public class SqliteClosedHelper implements Interface {
         return lists;
     }
 
-    private boolean checkType(Object aClass) {
 
-        return aClass instanceof Integer || aClass instanceof Float || aClass instanceof Double;
+    @Override
+    public <T> SqliteClosedHelper updateTableFromClass(T table, T key) {
+        for (Field f : table.getClass().getDeclaredFields()) {
+            f.setAccessible(true);
+            try {
+                if (f.get(table) != null && f.get(table).equals(key)) {
+                    String field_name = f.getName();
+                    Object value = f.get(table);
+                    boolean ifExist = isFieldExist(field_name, value);
+                    if (ifExist) {
+                        Log.e("CHECK","GOT");
+                        setTable(table.getClass().getSimpleName());
+                        clearAll();
+                        Field[] items = table.getClass().getDeclaredFields();
+                        for (int i = 0; i < items.length - 2; i++) {
+                            try {
+                                items[i].setAccessible(true);
+                                String parameter = items[i].getName();
+                                Object object = items[i].get(table);
+                                updateFields(parameter, object);
+                            } catch (IllegalAccessException e) {
+                                throw new Error(e.getMessage());
+                            }
+                        }
+                        Log.e("CHECK","CALL");
+                        update(field_name, value);
+
+                    } else {
+                        insertTableFromClass(table);
+                    }
+                    return this;
+                }
+            } catch (IllegalAccessException e) {
+
+            }
+
+        }
+
+
+        return this;
     }
 
     private Object getItem(Class<?> type, Cursor cursor, int i) {

@@ -1,9 +1,11 @@
 package com.wisdomrider.sqliteclosedhelper;
 
-public class Checks {
+public class Checks  {
+
     private String first, lastname;
     private int age;
     private float hell;
+
 
     public float getHell() {
         return hell;
