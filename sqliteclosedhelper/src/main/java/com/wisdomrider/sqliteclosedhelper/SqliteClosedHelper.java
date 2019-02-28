@@ -76,6 +76,7 @@ public class SqliteClosedHelper implements Interface {
             Fields field = fields.get(a);
             var_name = var_name + field.getFieldname() + " " + field.getType() + " " + field.getParameters() + ",";
         }
+
         var_name = var_name.substring(0, var_name.length() - 1);
         if (!var_name.toLowerCase().contains("text primary")) {
             query("create table if not exists " + TABLENAME + " (" + var_name + ")");

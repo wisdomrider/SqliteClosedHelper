@@ -17,10 +17,14 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         SqliteClosed closed = new SqliteClosed(this, "DBNAME");
-        Checks c=new Checks();
+        Checks c = new Checks();
         ArrayList<Method> m = closed.decompile(c);
+        String s1 = m.get(0).getUniqueKey();
         m.get(0).setValue(10);
-        Log.e("Err",m.get(0).getUniqueKey());
+        String s2=m.get(0).getUniqueKey();
+        if(s1.equals(s2)){
+            Log.e("fuck","yeah");
+        }
 
     }
 

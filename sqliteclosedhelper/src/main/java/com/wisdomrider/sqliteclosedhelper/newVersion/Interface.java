@@ -6,4 +6,6 @@ public interface Interface {
     void Query(String q);
 
     <T> ArrayList<Method> decompile(T t);
+
+    <T> SqliteClosed createTable(T t);
 }
