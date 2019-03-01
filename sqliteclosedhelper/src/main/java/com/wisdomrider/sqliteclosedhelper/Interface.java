@@ -1,68 +1,27 @@
 package com.wisdomrider.sqliteclosedhelper;
-// Created by WisdomRider (Avishek Adhikari) On 4/13/2018
-
-
-import android.database.Cursor;
 
 import java.util.ArrayList;
 
-interface Interface {
-    SqliteClosedHelper setTable(String name);
+public interface Interface {
+    void Query(String q);
 
-    void query(String data);
+    <T> ArrayList<Method> decompile(T t);
 
-    void close();
+    <T> SqliteClosedHelper createTable(T t);
 
-    SqliteClosedHelper setTableFields(String name, TYPE type);
+    <T> SqliteClosedHelper insertTable(T t);
 
-    SqliteClosedHelper setTableFields(String name, TYPE type, PARAMETERS parameters);
+    <T> SqliteClosedHelper updateTable(T t);
 
-    SqliteClosedHelper create();
+    <T> ArrayList<T> whereAND(T t);
 
-    void renameTable(String oldname, String newname);
+    <T> ArrayList<T> whereOR(T t);
 
-    void dropTable(String tablename);
+    <T> ArrayList<T> getAll(T t);
 
-    SqliteClosedHelper clearAll();
+    <T> SqliteClosedHelper renameTable(T t, String newName);
 
-    boolean ifTableExist(String TABLENAME);
-
-    boolean isFieldExist(String fieldname, Object value);
-
-    Cursor getField(String key);
-
-    SqliteClosedHelper insertFields(String data, Object value);
-
-    void insert();
-
-    SqliteClosedHelper clearAllFields();
-
-    Cursor getAll();
-
-    Cursor get(String query);
-
-    SqliteClosedHelper delete(String where, Object Value);
-
-    Cursor getWhere(String field, String value);
-
-    Cursor getWhere(String field, int value);
-
-    SqliteClosedHelper updateFields(String name, Object value);
-
-    void update(String where, Object value);
-
-    void setSharedPreferences(String name);
-
-    <T> SqliteClosedHelper createTableFromClass(T table);
-
-    <T> SqliteClosedHelper insertTableFromClass(T table);
-
-    <T> SqliteClosedHelper updateTableFromClass(T table,T key);
-
-    <T> ArrayList<T> getAll(T table);
-
-    <T> ArrayList<T> getWhere(T table);
+    void closeDatabase();
 
 
-    TYPE getType(Class<?> type);
 }

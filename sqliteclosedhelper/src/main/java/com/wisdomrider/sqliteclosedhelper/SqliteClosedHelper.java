@@ -1,502 +1,181 @@
 package com.wisdomrider.sqliteclosedhelper;
-// Created by WisdomRider (Avishek Adhikari) On 4/12/2018
 
-
-import android.content.ContentValues;
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.database.Cursor;
-import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class SqliteClosedHelper implements Interface {
-    private Context context;
-    private String DATABASENAME;
-    private String TABLENAME;
-    private SQLiteDatabase database;
-    public SharedPreferences sharedPreferences;
-    SharedPreferences.Editor sharedPreferencesEditor;
-    private ArrayList<Fields> fields = new ArrayList<>();
-    private ArrayList<Insert> insert = new ArrayList<>();
-    private ArrayList<Insert> update = new ArrayList<>();
-    private helpmesqlite Sqlite;
+    Context c;
+    String DB_NAME;
+    SQLiteDatabase database;
+    helpmesqlite Sqlite;
 
-    public SqliteClosedHelper(Context context, String dbname) {
-        this.context = context;
-        this.DATABASENAME = dbname;
-        Sqlite = new helpmesqlite(context, dbname);
-        sharedPreferences = context.getSharedPreferences("SqliteClosedHelper_data", 0);
-        sharedPreferencesEditor = sharedPreferences.edit();
+
+    public SqliteClosedHelper(Context c, String DB_NAME) {
+        this.c = c;
+        this.DB_NAME = DB_NAME;
+        Sqlite = new helpmesqlite(c, DB_NAME);
         database = Sqlite.getDatabase();
+    }
+
+    @Override
+    public void Query(String q) {
+        database.execSQL(q);
+
 
     }
 
+    @Override
+    public <T> ArrayList<Method> decompile(T t) {
+        ArrayList<Method> methods = new ArrayList<>();
+        ArrayList<Field> fields = new ArrayList<>(Arrays.asList(t.getClass().getDeclaredFields()).subList(0, t.getClass().getDeclaredFields().length - 2));
+        for (Field f : fields) {
+            methods.add(new Method(f, t));
+        }
+        return methods;
+    }
 
     @Override
-    public SqliteClosedHelper setTable(String name) {
-        this.TABLENAME = name;
-        fields.clear();
+    public <T> SqliteClosedHelper createTable(T t) {
+        ArrayList<Method> methods = decompile(t);
+        StringBuilder var_name = new StringBuilder("CREATE TABLE if not exists `" + t.getClass().getSimpleName() + "` (");
+        for (Method m : methods) var_name.append(m.getCreateTableQuery());
+        var_name = new StringBuilder(var_name.substring(0, var_name.length() - 1) + " )");
+        Log.e("QUERY", var_name.toString());
+        Query(var_name.toString());
+        return this;
+    }
+
+    @Override
+    public <T> SqliteClosedHelper insertTable(T t) {
+        ArrayList<Method> methods = decompile(t);
+        StringBuilder var_name = new StringBuilder("INSERT INTO `" + t.getClass().getSimpleName() + "`(");
+        for (Method m : methods) {
+            if (m.getValue() != null)
+                var_name.append("`" + m.key() + "`,");
+        }
+        var_name = new StringBuilder(var_name.substring(0, var_name.length() - 1) + ") VALUES (");
+        for (Method m : methods) {
+            if (!m.isNull())
+                if (m.isString())
+                    var_name.append("'" + m.getValue() + "' ,");
+                else
+                    var_name.append(m.getValue() + ",");
+        }
+        var_name = new StringBuilder(var_name.substring(0, var_name.length() - 1) + ")");
+        Log.e("QUERY", String.valueOf(var_name));
+        database.execSQL(String.valueOf(var_name));
         return this;
     }
 
 
     @Override
-    public void query(String data) {
-        database.execSQL(data);
+    public <T> SqliteClosedHelper updateTable(T t) {
+        ArrayList<Method> methods = decompile(t);
+        StringBuilder primary = new StringBuilder(" WHERE ");
+        StringBuilder var_name = new StringBuilder("UPDATE " + t.getClass().getSimpleName() + " SET ");
+        for (Method m : methods) {
+            String key = "";
+            if (!m.isNull()) {
+                if (m.isString())
+                    key = m.key() + "='" + m.getValue() + "',";
+                else
+                    key += m.key() + "=" + m.getValue() + ",";
+                if (!m.isPrimary()) var_name.append(key);
+                else {
+                    primary.append(key);
+                }
+            }
+        }
+        Cursor cursor = database.rawQuery("SELECT * FROM " + t.getClass().getSimpleName() + primary.toString().replace(",", ""), null);
+        if (cursor.getCount() == 0) {
+            insertTable(t);
+            return this;
+        }
+        var_name = new StringBuilder(var_name.substring(0, var_name.length() - 1));
+        primary = new StringBuilder(primary.substring(0, primary.length() - 1));
+        var_name.append(primary);
+        Log.e("ERR", String.valueOf(var_name));
+        database.execSQL(String.valueOf(var_name));
+        return this;
+    }
+
+
+    //    SELECT * FROM 'Checks' where name = '2';
+    @Override
+    public <T> ArrayList<T> whereAND(T t) {
+        return where(t, Constants.AND, 4);
     }
 
     @Override
-    public void close() {
+    public <T> ArrayList<T> whereOR(T t) {
+        return where(t, Constants.OR, 3);
+    }
+
+    @Override
+    public <T> ArrayList<T> getAll(T t) {
+        Cursor cursor = database.rawQuery("SELECT * FROM " + t.getClass().getSimpleName(), null);
+        return getArrayFromCursor(cursor, t, decompile(t));
+    }
+
+    @Override
+    public void closeDatabase() {
         database.close();
     }
 
-
     @Override
-    public SqliteClosedHelper setTableFields(String name, TYPE type) {
-        fields.add(new Fields(name, type, Wisdom.NONE()));
+    public <T> SqliteClosedHelper renameTable(T t, String newName) {
+        /* Make sure to change class name to it will crash */
+        Query("ALTER TABLE " + t.getClass().getSimpleName() + " RENAME TO " + newName + ";");
         return this;
     }
 
 
-    @Override
-    public SqliteClosedHelper setTableFields(String name, TYPE type, PARAMETERS parameters) {
-        fields.add(new Fields(name, type, parameters));
-        return this;
-    }
-
-
-    @Override
-    public SqliteClosedHelper create() {
-        String var_name = "";
-        for (int a = 0; a < fields.size(); a++) {
-            Fields field = fields.get(a);
-            var_name = var_name + field.getFieldname() + " " + field.getType() + " " + field.getParameters() + ",";
-        }
-
-        var_name = var_name.substring(0, var_name.length() - 1);
-        if (!var_name.toLowerCase().contains("text primary")) {
-            query("create table if not exists " + TABLENAME + " (" + var_name + ")");
-        } else {
-            throw new Error("Text cannot be primary !");
-        }
-
-        fields.clear();
-        return this;
-    }
-
-
-    @Override
-    public void renameTable(String oldname, String newname) {
-        query("ALTER TABLE " + oldname + " RENAME TO " + newname + ";");
-    }
-
-    @Override
-    public void dropTable(String tablename) {
-        query("DROP TABLE " + tablename);
-    }
-
-    @Override
-    public SqliteClosedHelper updateFields(String name, Object value) {
-        update.add(new Insert(name, value));
-        return this;
-    }
-
-    @Override
-    public void update(String where, Object value) {
-        ContentValues contentValues = new ContentValues();
-        for (int y = 0; y < update.size(); y++) {
-            Insert data = update.get(y);
-            if (data.getValue() instanceof Integer) {
-                contentValues.put(data.getName(), (Integer) data.getValue());
-            } else if (data.getValue() instanceof String) {
-                contentValues.put(data.getName(), data.getValue().toString());
-            } else if (data.getValue() instanceof Long) {
-                contentValues.put(data.getName(), (long) data.getValue());
-            } else if (data.getValue() instanceof Float) {
-                contentValues.put(data.getName(), (float) data.getValue());
-            } else {
-                throw new Error("Object not recognized must be long, int or string ");
-            }
-        }
-        String valuee;
-        if (value instanceof Integer) {
-            valuee = Integer.toString((Integer) value);
-        } else {
-            valuee = value.toString();
-        }
-        database.update(TABLENAME, contentValues, where + " = ?", new String[]{valuee});
-        fields.clear();
-
-    }
-
-    @Override
-    public void setSharedPreferences(String name) {
-        sharedPreferences = context.getSharedPreferences(name, 0);
-        sharedPreferencesEditor = sharedPreferences.edit();
-    }
-
-
-    @Override
-    public SqliteClosedHelper clearAll() {
-        fields.clear();
-        update.clear();
-        insert.clear();
-        return this;
-    }
-
-    @Override
-    public boolean ifTableExist(String table1) {
-        try {
-            database.rawQuery("SELECT * FROM " + table1, null);
-            return true;
-        } catch (SQLException e) {
-            return false;
-        }
-
-    }
-
-    @Override
-    public boolean isFieldExist(String fieldname, Object value) {
-        if (database == null) return false;
-        Cursor res = database.rawQuery("select " + fieldname + " from " + TABLENAME, null);
-        if (res.getCount() == 0) {
-            return false;
-        } else {
-            while (res.moveToNext()) {
-                int data = check(value);
-                if (data == 1) {
-                    if ((Integer) value == res.getInt(0)) return true;
-                } else if (data == 2) {
-                    if (value.toString().equals(res.getString(0))) return true;
-
-                }
-
-            }
-        }
-        return false;
-    }
-
-    @Override
-    public Cursor getField(String key) {
-        if (database == null) return null;
-        return database.rawQuery("select " + key + " from " + TABLENAME, null);
-    }
-
-    @Override
-    public SqliteClosedHelper insertFields(String data, Object value) {
-        insert.add(new Insert(data, value));
-        return this;
-    }
-
-
-    public int check(Object data) {
-        if (data instanceof Integer) {
-            return 1;
-        } else if (data instanceof String) {
-            return 2;
-        } else {
-            throw new Error("Object not recognized must be int or string ");
-        }
-    }
-
-
-    @Override
-    public void insert() {
-        ContentValues contentValues = new ContentValues();
-        for (int y = 0; y < insert.size(); y++) {
-            Insert data = insert.get(y);
-            if (data.getValue() instanceof Integer) {
-                contentValues.put(data.getName(), (Integer) data.getValue());
-            } else if (data.getValue() instanceof String) {
-                contentValues.put(data.getName(), (String) data.getValue().toString());
-            } else if (data.getValue() instanceof Long) {
-                contentValues.put(data.getName(), (long) data.getValue());
-            } else if (data.getValue() instanceof Float) {
-                contentValues.put(data.getName(), (float) data.getValue());
-            } else {
-                throw new Error("Object not recognized must be int or string ");
-            }
-        }
-
-        database.insertOrThrow(TABLENAME, null, contentValues);
-        clearAll();
-    }
-
-    @Override
-    public SqliteClosedHelper clearAllFields() {
-        database.execSQL("delete from " + TABLENAME);
-        return this;
-    }
-
-
-    @Override
-    public Cursor getAll() {
-        Cursor res = database.rawQuery("select * from " + TABLENAME, null);
-        return res;
-    }
-
-
-    @Override
-    public Cursor getWhere(String tablefield, String value) {
-        Cursor res = database.rawQuery("select * from " + TABLENAME + " where " + tablefield + "='" + value + "';", null);
-        return res;
-    }
-
-    @Override
-    public Cursor getWhere(String tablefield, int value) {
-        Cursor res = database.rawQuery("select * from " + TABLENAME + " where " + tablefield + "=" + value + ";", null);
-        return res;
-    }
-
-    @Override
-    public Cursor get(String query) {
-
-        Cursor res = database.rawQuery("select * from " + TABLENAME + " " + query, null);
-        return res;
-    }
-
-    @Override
-    public SqliteClosedHelper delete(String where, Object Value) {
-        database.execSQL("delete from " + TABLENAME + " where " + where + "= '" + Value + "' ;");
-        return this;
-    }
-
-    @Override
-    public <T> SqliteClosedHelper createTableFromClass(T table) {
-        setTable(table.getClass().getSimpleName());
-        clearAll();
-        setTableFields(Constants.DEFAULT_ID, Wisdom.INTEGER(), Wisdom.PRIMARY_AUTOINCREMENT());
-        Field[] items = table.getClass().getDeclaredFields();
-        for (int i = 0; i < items.length - 2; i++) {
-            String o = items[i].getName();
-            setTableFields(o, getType(items[i].getType()));
-        }
-        create();
-        return this;
-    }
-
-    @Override
-    public <T> SqliteClosedHelper insertTableFromClass(T table) {
-        setTable(table.getClass().getSimpleName());
-        clearAll();
-        Field[] items = table.getClass().getDeclaredFields();
-        for (int i = 0; i < items.length - 2; i++) {
-            try {
-                items[i].setAccessible(true);
-                String parameter = items[i].getName();
-                Object object = items[i].get(table);
-                checkAndInsert(parameter, object);
-            } catch (IllegalAccessException e) {
-                throw new Error(e.getMessage());
-            }
-        }
-        insert();
-        return this;
-    }
-
-    private void checkAndInsert(String parameter, Object object) {
-
-        if (object instanceof String)
-            insertFields(parameter, (String) object);
-        else if (object instanceof Integer)
-            insertFields(parameter, (Integer) object);
-        else if (object instanceof Double)
-            insertFields(parameter, (Double) object);
-        else if (object instanceof Long)
-            insertFields(parameter, (Long) object);
-
-    }
-
-
-    private void checkAndUpdate(String parameter, Object object) {
-        if (object instanceof String)
-            updateFields(parameter, (String) object);
-        else if (object instanceof Integer)
-            updateFields(parameter, (Integer) object);
-        else if (object instanceof Double)
-            updateFields(parameter, (Double) object);
-        else if (object instanceof Long)
-            updateFields(parameter, (Long) object);
-
-    }
-
-    @Override
-    public TYPE getType(Class<?> type) {
-        TYPE getType;
-        switch (type.toString()) {
-            case "double":
-                getType = Wisdom.CUSTOMTYPE("REAL");
-                break;
-            case "int":
-                getType = Wisdom.INTEGER();
-                break;
-            case "float":
-                getType = Wisdom.CUSTOMTYPE("REAL");
-                break;
-            case "long":
-                getType = Wisdom.CUSTOMTYPE("REAL");
-                break;
-            case "class java.lang.Double":
-                getType = Wisdom.CUSTOMTYPE("REAL");
-                break;
-            case "class java.lang.Float":
-                getType = Wisdom.CUSTOMTYPE("REAL");
-                break;
-            case "class java.lang.String":
-                getType = Wisdom.STRING();
-                break;
-            case "class java.lang.Integer":
-                getType = Wisdom.INTEGER();
-                break;
-            case "class java.lang.Long":
-                getType = Wisdom.INTEGER();
-                break;
-            default:
-                throw new Error("Object cannot be initialized on sqlite");
-
-        }
-        return getType;
-    }
-
-    @Override
-    public <T> ArrayList<T> getAll(T table) {
-        setTable(table.getClass().getSimpleName());
-        clearAll();
-        ArrayList<T> lists = new ArrayList<>();
-        Cursor cursor = getAll();
-        if (cursor.getCount() == 0) return lists;
-        while (cursor.moveToNext()) {
-            T var = table;
-            Field[] items = var.getClass().getDeclaredFields();
-            for (int i = 0; i < items.length - 2; i++) {
-                items[i].setAccessible(true);
-                try {
-                    items[i].set(var, getItem(items[i].getType(), cursor, i + 1));
-                } catch (IllegalAccessException e) {
-                    throw new Error(e.getMessage());
-                }
-
-            }
-            lists.add(table);
-        }
-
-        return lists;
-    }
-
-    @Override
-    public <T> ArrayList<T> getWhere(T table) {
-        setTable(table.getClass().getSimpleName());
-        clearAll();
-        ArrayList<T> lists = new ArrayList<>();
-        for (Field f : table.getClass().getDeclaredFields()) {
-            try {
-                f.setAccessible(true);
-                if (f.get(table) != null && !f.get(table).equals(0)) {
-                    String query = "select * from " + table.getClass().getSimpleName() + " where " + f.getName() + "='" + f.get(table) + "';";
-                    Cursor cursor = database.rawQuery(query, null);
-                    if (cursor.getCount() == 0) return lists;
-                    while (cursor.moveToNext()) {
-                        T var = table;
-                        Field[] items = var.getClass().getDeclaredFields();
-                        for (int i = 0; i < items.length - 2; i++) {
-                            items[i].setAccessible(true);
-                            try {
-                                items[i].set(var, getItem(items[i].getType(), cursor, i + 1));
-                            } catch (IllegalAccessException e) {
-                                throw new Error(e.getMessage());
-                            }
-
-                        }
-                        lists.add(table);
-                    }
-                    return lists;
-                }
-            } catch (IllegalAccessException e) {
-                throw new Error(e.getMessage());
-            }
-        }
-
-        return lists;
-    }
-
-
-    @Override
-    public <T> SqliteClosedHelper updateTableFromClass(T table, T key) {
-        setTable(table.getClass().getSimpleName());
-        for (Field f : table.getClass().getDeclaredFields()) {
-            f.setAccessible(true);
-            try {
-                if (f.get(table) != null && f.get(table).equals(key)) {
-                    String field_name = f.getName();
-                    Object value = f.get(table);
-                    boolean ifExist = isFieldExist(field_name, value);
-                    if (ifExist) {
-                        clearAll();
-                        Field[] items = table.getClass().getDeclaredFields();
-                        for (int i = 0; i < items.length - 2; i++) {
-                            try {
-                                items[i].setAccessible(true);
-                                String parameter = items[i].getName();
-                                Object object = items[i].get(table);
-                                checkAndUpdate(parameter, object);
-                            } catch (IllegalAccessException e) {
-                                throw new Error(e.getMessage());
-                            }
-                        }
-                        update(field_name, value);
-
-                    } else {
-                        insertTableFromClass(table);
-                    }
-                    return this;
-                }
-            } catch (IllegalAccessException e) {
-
+    public <T> ArrayList<T> where(T t, String what, int position) {
+        StringBuilder var_name = new StringBuilder("SELECT * FROM " + t.getClass().getSimpleName() + " WHERE ");
+        ArrayList<Method> methods = decompile(t);
+        for (Method m : methods) {
+            if (!m.isNull()) {
+                if (m.isString())
+                    var_name.append(m.key()).append(" = '").append(m.getValue()).append("' " + what + " ");
+                else
+                    var_name.append(m.key()).append(" = ").append(m.getValue()).append(" " + what + " ");
             }
 
         }
-
-
-        return this;
+        var_name = new StringBuilder(var_name.substring(0, var_name.length() - position));
+        Cursor c = database.rawQuery(String.valueOf(var_name), null);
+        return getArrayFromCursor(c, t, methods);
     }
 
-    private Object getItem(Class<?> type, Cursor cursor, int i) {
-        Object getType;
-        switch (type.toString()) {
-            case "double":
-                getType = cursor.getDouble(i);
-                break;
-            case "int":
-                getType = cursor.getInt(i);
-                break;
-            case "float":
-                getType = cursor.getFloat(i);
-                break;
-            case "long":
-                getType = cursor.getLong(i);
-                break;
-            case "class java.lang.Double":
-                getType = cursor.getDouble(i);
-                break;
-            case "class java.lang.Float":
-                getType = cursor.getFloat(i);
-                break;
-            case "class java.lang.String":
-                getType = cursor.getString(i);
-                break;
-            case "class java.lang.Integer":
-                getType = cursor.getInt(i);
-                break;
-            case "class java.lang.Long":
-                getType = cursor.getLong(i);
-                break;
-            default:
-                throw new Error("Object cannot be initialized on sqlite");
+
+    private <T> ArrayList<T> getArrayFromCursor(Cursor c, T t, ArrayList<Method> methods) {
+        ArrayList<T> list = new ArrayList<>();
+        if (c.getCount() == 0) return list;
+        while (c.moveToNext()) {
+            int i = 0;
+            for (Method m : methods) {
+                if (m.getType().equals(String.class)) m.setValue(c.getString(i));
+                else if (m.getType().equals(Integer.class) || m.getType().equals(int.class))
+                    m.setValue(c.getInt(i));
+                else if (m.getType().equals(Double.class) || m.getType().equals(double.class))
+                    m.setValue(c.getDouble(i));
+                else if (m.getType().equals(Float.class) || m.getType().equals(float.class))
+                    m.setValue(c.getFloat(i));
+                else if (m.getType().equals(Long.class) || m.getType().equals(long.class))
+                    m.setValue(c.getLong(i));
+                else if (m.getType().equals(boolean.class) || m.getType().equals(Boolean.class))
+                    m.setValue(Boolean.parseBoolean(c.getString(i)));
+                i++;
+            }
+            list.add((T) methods.get(0).table);
         }
-        return getType;
+        return list;
+
     }
 }
