@@ -1,7 +1,10 @@
 package com.wisdomrider.sqliteclosedhelper;
 
 
+import android.widget.ImageView;
+
 public class Checks {
+
     @SqliteAnnotations.Primary
     @SqliteAnnotations.AutoIncrement
     int id;
@@ -13,6 +16,9 @@ public class Checks {
     String place;
 
     boolean hey;
+
+    @MethodAnnotations.Exclude
+    ImageView imageView;
 
     public int getId() {
         return id;

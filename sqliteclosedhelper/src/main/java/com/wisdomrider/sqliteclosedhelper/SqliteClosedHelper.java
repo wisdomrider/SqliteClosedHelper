@@ -35,7 +35,9 @@ public class SqliteClosedHelper implements Interface {
         ArrayList<Method> methods = new ArrayList<>();
         ArrayList<Field> fields = new ArrayList<>(Arrays.asList(t.getClass().getDeclaredFields()).subList(0, t.getClass().getDeclaredFields().length - 2));
         for (Field f : fields) {
-            methods.add(new Method(f, t));
+            Method method = new Method(f, t);
+            if (!method.checkAnnotaions(MethodAnnotations.Exclude.class))
+                methods.add(method);
         }
         return methods;
     }
@@ -130,7 +132,7 @@ public class SqliteClosedHelper implements Interface {
 
     @Override
     public <T> SqliteClosedHelper renameTable(T t, String newName) {
-        /* Make sure to change class name to it will crash */
+        /* Make sure to change class name too otherwise it will crash */
         Query("ALTER TABLE " + t.getClass().getSimpleName() + " RENAME TO " + newName + ";");
         return this;
     }
