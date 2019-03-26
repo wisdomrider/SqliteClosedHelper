@@ -15,9 +15,13 @@ public interface Interface {
 
     <T> ArrayList<T> whereAND(T t);
 
+    <T> SqliteClosedHelper delete(T t);
+
     <T> ArrayList<T> whereOR(T t);
 
     <T> ArrayList<T> getAll(T t);
+
+    <T> SqliteClosedHelper removeAll(T t);
 
     <T> SqliteClosedHelper renameTable(T t, String newName);
 

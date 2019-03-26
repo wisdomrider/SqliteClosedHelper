@@ -27,7 +27,6 @@ public class SqliteClosedHelper implements Interface {
     public void Query(String q) {
         database.execSQL(q);
 
-
     }
 
     @Override
@@ -48,10 +47,11 @@ public class SqliteClosedHelper implements Interface {
         StringBuilder var_name = new StringBuilder("CREATE TABLE if not exists `" + t.getClass().getSimpleName() + "` (");
         for (Method m : methods) var_name.append(m.getCreateTableQuery());
         var_name = new StringBuilder(var_name.substring(0, var_name.length() - 1) + " )");
-        Log.e("QUERY", var_name.toString());
+        Log.d("QUERY", var_name.toString());
         Query(var_name.toString());
         return this;
     }
+
 
     @Override
     public <T> SqliteClosedHelper insertTable(T t) {
@@ -70,7 +70,7 @@ public class SqliteClosedHelper implements Interface {
                     var_name.append(m.getValue() + ",");
         }
         var_name = new StringBuilder(var_name.substring(0, var_name.length() - 1) + ")");
-        Log.e("QUERY", String.valueOf(var_name));
+        Log.d("QUERY", String.valueOf(var_name));
         database.execSQL(String.valueOf(var_name));
         return this;
     }
@@ -102,16 +102,34 @@ public class SqliteClosedHelper implements Interface {
         var_name = new StringBuilder(var_name.substring(0, var_name.length() - 1));
         primary = new StringBuilder(primary.substring(0, primary.length() - 1));
         var_name.append(primary);
-        Log.e("ERR", String.valueOf(var_name));
+        Log.d("QUERY", String.valueOf(var_name));
         database.execSQL(String.valueOf(var_name));
         return this;
     }
 
 
-    //    SELECT * FROM 'Checks' where name = '2';
     @Override
     public <T> ArrayList<T> whereAND(T t) {
         return where(t, Constants.AND, 4);
+    }
+
+    @Override
+    public <T> SqliteClosedHelper delete(T t) {
+        String what = Constants.AND;
+        StringBuilder var_name = new StringBuilder("DELETE FROM " + t.getClass().getSimpleName() + " WHERE ");
+        ArrayList<Method> methods = decompile(t);
+        for (Method m : methods) {
+            if (!m.isNull()) {
+                if (m.isString())
+                    var_name.append(m.key()).append(" = '").append(m.getValue()).append("' ").append(what).append(" ");
+                else
+                    var_name.append(m.key()).append(" = ").append(m.getValue()).append(" ").append(what).append(" ");
+            }
+
+        }
+        var_name = new StringBuilder(var_name.substring(0, var_name.length() - 4));
+        database.execSQL(String.valueOf(var_name));
+        return this;
     }
 
     @Override
@@ -123,6 +141,12 @@ public class SqliteClosedHelper implements Interface {
     public <T> ArrayList<T> getAll(T t) {
         Cursor cursor = database.rawQuery("SELECT * FROM " + t.getClass().getSimpleName(), null);
         return getArrayFromCursor(cursor, t, decompile(t));
+    }
+
+    @Override
+    public <T> SqliteClosedHelper removeAll(T t) {
+        Query("DELETE FROM " + t.getClass().getSimpleName());
+        return this;
     }
 
     @Override
