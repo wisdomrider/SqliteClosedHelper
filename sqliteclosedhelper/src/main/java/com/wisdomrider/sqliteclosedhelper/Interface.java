@@ -23,6 +23,10 @@ public interface Interface {
 
     <T> SqliteClosedHelper removeAll(T t);
 
+    <T> SqliteClosedHelper updateAll(ArrayList<T> t);
+
+    <T> SqliteClosedHelper insertAll(ArrayList<T> t);
+
     <T> SqliteClosedHelper renameTable(T t, String newName);
 
     void closeDatabase();

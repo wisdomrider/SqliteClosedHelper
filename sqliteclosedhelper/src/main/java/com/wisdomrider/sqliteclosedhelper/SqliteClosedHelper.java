@@ -150,6 +150,18 @@ public class SqliteClosedHelper implements Interface {
     }
 
     @Override
+    public <T> SqliteClosedHelper updateAll(ArrayList<T> t) {
+        for (T t1 : t) updateTable(t1);
+        return this;
+    }
+
+    @Override
+    public <T> SqliteClosedHelper insertAll(ArrayList<T> t) {
+        for (T t1 : t) insertTable(t1);
+        return this;
+    }
+
+    @Override
     public void closeDatabase() {
         database.close();
     }

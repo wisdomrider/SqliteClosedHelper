@@ -14,12 +14,12 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         SqliteClosedHelper closed = new SqliteClosedHelper(this, "DBNAME");
-        Checks c = new Checks();
-        c.id = 50;
-        c.hey = true;
-        c.age = 20f;
-        c.place = "fucka";
-        closed.createTable(c);
+
+
+
+
+
+
 //        closed.updateTable(c);
 //        ArrayList<Checks> checks = closed.whereOR(c);
 

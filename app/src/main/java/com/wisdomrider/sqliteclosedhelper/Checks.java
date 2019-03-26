@@ -24,8 +24,9 @@ public class Checks {
         return id;
     }
 
-    public void setId(int id) {
+    public Checks setId(int id) {
         this.id = id;
+        return this;
     }
 
     public String getName() {
