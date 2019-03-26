@@ -109,7 +109,7 @@ Make Sure Not to Change BookId as it is primary key database checks the primary 
 
  Here Books With Id 01 and Cost 47.2 Will Be Listed in ArrayList
  
-   ##OR CASE
+   ## OR CASE
         
                 Book book = new Book();
                 book.setBookId(01);
@@ -118,9 +118,9 @@ Make Sure Not to Change BookId as it is primary key database checks the primary 
 
 Here Books with Id 01 or Cost 47.2 Will Appear in books
 
-# INSERTING/UPDATING LARGE AMOUNT OF DATA (FROM ARRAYLIST)
+## INSERTING/UPDATING LARGE AMOUNT OF DATA (FROM ARRAYLIST)
 
- #Lets Suppose The Items Are 
+ ## Lets Suppose The Items Are 
  
                   ArrayList<Book> books=new ArrayList<>();
                   Book book1=new Book();
@@ -139,7 +139,7 @@ Here Books with Id 01 or Cost 47.2 Will Appear in books
  ## TO INSERT ALL
                helper.insertAll(books);
                
- ##TO UPDATE ALL              
+ ## TO UPDATE ALL              
                  helper.updateAll(books);
 
 ## Pass Your Custom Query 
