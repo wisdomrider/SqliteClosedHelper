@@ -3,6 +3,19 @@ package com.wisdomrider.sqliteclosedhelper;
 import java.lang.reflect.Field;
 import java.lang.reflect.Type;
 
+/*
+   Created By WisdomRider(Avishek Adhikari)
+
+    Email : avishekzone@gmail.com
+
+    Make Sure to Star Us On Github :
+       https://github.com/wisdomrider/SqliteClosedHelper
+
+     Credit Me SomeWhere In Your Project :)
+
+     Thanks !!
+*/
+
 public class Method<T> {
     private Field field;
     T table;
@@ -13,7 +26,7 @@ public class Method<T> {
     }
 
     public boolean isString() {
-        return getType().equals(String.class)||getType().equals(Boolean.class)||getType().equals(boolean.class);
+        return getType().equals(String.class) || getType().equals(Boolean.class) || getType().equals(boolean.class);
     }
 
     public T getTable() {
@@ -32,6 +45,10 @@ public class Method<T> {
             throw new Error(e.getMessage());
         }
         return this;
+    }
+
+    public void Wisdomrider() {
+
     }
 
     public Class<Boolean> a() {
@@ -68,8 +85,6 @@ public class Method<T> {
             return Constants.TEXT;
         }
     }
-
-
 
 
     public String key() {

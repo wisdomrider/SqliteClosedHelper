@@ -9,15 +9,28 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+/*
+   Created By WisdomRider(Avishek Adhikari)
+
+    Email : avishekzone@gmail.com
+
+    Make Sure to Star Me On Github :
+       https://github.com/wisdomrider/SqliteClosedHelper
+
+     Credit Me SomeWhere In Your Project :)
+
+     Thanks !!
+*/
+
 public class SqliteClosedHelper implements Interface {
-    Context c;
-    String DB_NAME;
-    SQLiteDatabase database;
-    helpmesqlite Sqlite;
+    private Context wisdomrider;
+    private String DB_NAME;
+    private SQLiteDatabase database;
+    private helpmesqlite Sqlite;
 
 
     public SqliteClosedHelper(Context c, String DB_NAME) {
-        this.c = c;
+        this.wisdomrider = c;
         this.DB_NAME = DB_NAME;
         Sqlite = new helpmesqlite(c, DB_NAME);
         database = Sqlite.getDatabase();
@@ -174,7 +187,7 @@ public class SqliteClosedHelper implements Interface {
     }
 
 
-    public <T> ArrayList<T> where(T t, String what, int position) {
+    private <T> ArrayList<T> where(T t, String what, int position) {
         StringBuilder var_name = new StringBuilder("SELECT * FROM " + t.getClass().getSimpleName() + " WHERE ");
         ArrayList<Method> methods = decompile(t);
         for (Method m : methods) {

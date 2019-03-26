@@ -1,5 +1,18 @@
 package com.wisdomrider.sqliteclosedhelper;
 
+/*
+   Created By WisdomRider(Avishek Adhikari)
+
+    Email : avishekzone@gmail.com
+
+    Make Sure to Star Us On Github :
+       https://github.com/wisdomrider/SqliteClosedHelper
+
+     Credit Me SomeWhere In Your Project :)
+
+     Thanks !!
+*/
+
 import java.util.ArrayList;
 
 public interface Interface {

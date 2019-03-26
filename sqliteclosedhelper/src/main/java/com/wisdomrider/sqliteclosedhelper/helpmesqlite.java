@@ -11,9 +11,18 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
-/**
- * Created by WisdomRider (Avishek Adhikari) on 4/12/2018.
- */
+/*
+   Created By WisdomRider(Avishek Adhikari)
+
+    Email : avishekzone@gmail.com
+
+    Make Sure to Star Me On Github :
+       https://github.com/wisdomrider/SqliteClosedHelper
+
+     Credit Me SomeWhere In Your Project :)
+
+     Thanks !!
+*/
 
 public class helpmesqlite extends SQLiteOpenHelper {
 

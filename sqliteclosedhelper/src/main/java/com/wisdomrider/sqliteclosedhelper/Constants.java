@@ -1,7 +1,17 @@
 package com.wisdomrider.sqliteclosedhelper;
 
-import java.lang.reflect.Field;
+/*
+   Created By WisdomRider(Avishek Adhikari)
 
+    Email : avishekzone@gmail.com
+
+    Make Sure to Star Me On Github :
+       https://github.com/wisdomrider/SqliteClosedHelper
+
+     Credit Me SomeWhere In Your Project :)
+
+     Thanks !!
+*/
 public class Constants {
 
     public static final String DEFAULT_ID ="id" ;
