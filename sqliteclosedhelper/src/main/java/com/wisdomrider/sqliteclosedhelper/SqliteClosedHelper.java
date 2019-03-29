@@ -4,20 +4,35 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
+import android.widget.Toast;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.ParameterizedType;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+/*
+   Created By WisdomRider(Avishek Adhikari)
+
+    Email : avishekzone@gmail.com
+
+    Make Sure to Star Me On Github :
+       https://github.com/wisdomrider/SqliteClosedHelper
+
+     Credit Me SomeWhere In Your Project :)
+
+     Thanks !!
+*/
+
 public class SqliteClosedHelper implements Interface {
-    Context c;
-    String DB_NAME;
-    SQLiteDatabase database;
-    helpmesqlite Sqlite;
+    private Context wisdomrider;
+    private String DB_NAME;
+    private SQLiteDatabase database;
+    private helpmesqlite Sqlite;
 
 
     public SqliteClosedHelper(Context c, String DB_NAME) {
-        this.c = c;
+        this.wisdomrider = c;
         this.DB_NAME = DB_NAME;
         Sqlite = new helpmesqlite(c, DB_NAME);
         database = Sqlite.getDatabase();
@@ -27,7 +42,6 @@ public class SqliteClosedHelper implements Interface {
     public void Query(String q) {
         database.execSQL(q);
 
-
     }
 
     @Override
@@ -35,10 +49,13 @@ public class SqliteClosedHelper implements Interface {
         ArrayList<Method> methods = new ArrayList<>();
         ArrayList<Field> fields = new ArrayList<>(Arrays.asList(t.getClass().getDeclaredFields()).subList(0, t.getClass().getDeclaredFields().length - 2));
         for (Field f : fields) {
-            methods.add(new Method(f, t));
+            Method method = new Method(f, t);
+            if (!method.checkAnnotaions(MethodAnnotations.Exclude.class))
+                methods.add(method);
         }
         return methods;
     }
+
 
     @Override
     public <T> SqliteClosedHelper createTable(T t) {
@@ -46,10 +63,11 @@ public class SqliteClosedHelper implements Interface {
         StringBuilder var_name = new StringBuilder("CREATE TABLE if not exists `" + t.getClass().getSimpleName() + "` (");
         for (Method m : methods) var_name.append(m.getCreateTableQuery());
         var_name = new StringBuilder(var_name.substring(0, var_name.length() - 1) + " )");
-        Log.e("QUERY", var_name.toString());
+        Log.d("QUERY", var_name.toString());
         Query(var_name.toString());
         return this;
     }
+
 
     @Override
     public <T> SqliteClosedHelper insertTable(T t) {
@@ -68,7 +86,7 @@ public class SqliteClosedHelper implements Interface {
                     var_name.append(m.getValue() + ",");
         }
         var_name = new StringBuilder(var_name.substring(0, var_name.length() - 1) + ")");
-        Log.e("QUERY", String.valueOf(var_name));
+        Log.d("QUERY", String.valueOf(var_name));
         database.execSQL(String.valueOf(var_name));
         return this;
     }
@@ -100,16 +118,34 @@ public class SqliteClosedHelper implements Interface {
         var_name = new StringBuilder(var_name.substring(0, var_name.length() - 1));
         primary = new StringBuilder(primary.substring(0, primary.length() - 1));
         var_name.append(primary);
-        Log.e("ERR", String.valueOf(var_name));
+        Log.d("QUERY", String.valueOf(var_name));
         database.execSQL(String.valueOf(var_name));
         return this;
     }
 
 
-    //    SELECT * FROM 'Checks' where name = '2';
     @Override
     public <T> ArrayList<T> whereAND(T t) {
         return where(t, Constants.AND, 4);
+    }
+
+    @Override
+    public <T> SqliteClosedHelper delete(T t) {
+        String what = Constants.AND;
+        StringBuilder var_name = new StringBuilder("DELETE FROM " + t.getClass().getSimpleName() + " WHERE ");
+        ArrayList<Method> methods = decompile(t);
+        for (Method m : methods) {
+            if (!m.isNull()) {
+                if (m.isString())
+                    var_name.append(m.key()).append(" = '").append(m.getValue()).append("' ").append(what).append(" ");
+                else
+                    var_name.append(m.key()).append(" = ").append(m.getValue()).append(" ").append(what).append(" ");
+            }
+
+        }
+        var_name = new StringBuilder(var_name.substring(0, var_name.length() - 4));
+        database.execSQL(String.valueOf(var_name));
+        return this;
     }
 
     @Override
@@ -120,7 +156,25 @@ public class SqliteClosedHelper implements Interface {
     @Override
     public <T> ArrayList<T> getAll(T t) {
         Cursor cursor = database.rawQuery("SELECT * FROM " + t.getClass().getSimpleName(), null);
-        return getArrayFromCursor(cursor, t, decompile(t));
+        return getArrayFromCursor(cursor, t);
+    }
+
+    @Override
+    public <T> SqliteClosedHelper removeAll(T t) {
+        Query("DELETE FROM " + t.getClass().getSimpleName());
+        return this;
+    }
+
+    @Override
+    public <T> SqliteClosedHelper updateAll(ArrayList<T> t) {
+        for (T t1 : t) updateTable(t1);
+        return this;
+    }
+
+    @Override
+    public <T> SqliteClosedHelper insertAll(ArrayList<T> t) {
+        for (T t1 : t) insertTable(t1);
+        return this;
     }
 
     @Override
@@ -130,13 +184,13 @@ public class SqliteClosedHelper implements Interface {
 
     @Override
     public <T> SqliteClosedHelper renameTable(T t, String newName) {
-        /* Make sure to change class name to it will crash */
+        /* Make sure to change class name too otherwise it will crash */
         Query("ALTER TABLE " + t.getClass().getSimpleName() + " RENAME TO " + newName + ";");
         return this;
     }
 
 
-    public <T> ArrayList<T> where(T t, String what, int position) {
+    private <T> ArrayList<T> where(T t, String what, int position) {
         StringBuilder var_name = new StringBuilder("SELECT * FROM " + t.getClass().getSimpleName() + " WHERE ");
         ArrayList<Method> methods = decompile(t);
         for (Method m : methods) {
@@ -150,16 +204,23 @@ public class SqliteClosedHelper implements Interface {
         }
         var_name = new StringBuilder(var_name.substring(0, var_name.length() - position));
         Cursor c = database.rawQuery(String.valueOf(var_name), null);
-        return getArrayFromCursor(c, t, methods);
+        return getArrayFromCursor(c, t);
     }
 
 
-    private <T> ArrayList<T> getArrayFromCursor(Cursor c, T t, ArrayList<Method> methods) {
+    private <T> ArrayList<T> getArrayFromCursor(Cursor c, T t) {
         ArrayList<T> list = new ArrayList<>();
         if (c.getCount() == 0) return list;
         while (c.moveToNext()) {
+            ArrayList<Method> methods;
+            try {
+                T table = (T) ((Class) t.getClass()).newInstance();
+                methods = decompile(table);
+            } catch (Exception e) {
+                methods = decompile(t);
+            }
             int i = 0;
-            for (Method m : methods) {
+            for (Method m : methods) { //id cost
                 if (m.getType().equals(String.class)) m.setValue(c.getString(i));
                 else if (m.getType().equals(Integer.class) || m.getType().equals(int.class))
                     m.setValue(c.getInt(i));
@@ -173,9 +234,13 @@ public class SqliteClosedHelper implements Interface {
                     m.setValue(Boolean.parseBoolean(c.getString(i)));
                 i++;
             }
+
             list.add((T) methods.get(0).table);
         }
+
         return list;
 
     }
+
+
 }
