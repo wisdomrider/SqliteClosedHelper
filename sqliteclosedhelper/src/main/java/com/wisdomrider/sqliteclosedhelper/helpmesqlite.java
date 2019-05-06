@@ -1,15 +1,9 @@
 package com.wisdomrider.sqliteclosedhelper;
 // Created by WisdomRider (Avishek Adhikari) On 4/12/2018
 
-import android.content.ContentValues;
 import android.content.Context;
-import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
 
 /*
    Created By WisdomRider(Avishek Adhikari)

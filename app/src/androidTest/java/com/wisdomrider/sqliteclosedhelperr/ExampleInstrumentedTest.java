@@ -1,4 +1,4 @@
-package com.wisdomrider.sqliteclosedhelper;
+package com.wisdomrider.sqliteclosedhelperr;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;

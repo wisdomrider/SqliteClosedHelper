@@ -1,6 +1,9 @@
-package com.wisdomrider.sqliteclosedhelper;
+package com.wisdomrider.sqliteclosedhelperr;
 
 import android.widget.ImageView;
+
+import com.wisdomrider.sqliteclosedhelper.MethodAnnotations;
+import com.wisdomrider.sqliteclosedhelper.SqliteAnnotations;
 
 public class Book {
     @SqliteAnnotations.Primary

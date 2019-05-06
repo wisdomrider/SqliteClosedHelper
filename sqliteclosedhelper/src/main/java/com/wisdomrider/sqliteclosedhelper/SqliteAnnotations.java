@@ -1,7 +1,5 @@
 package com.wisdomrider.sqliteclosedhelper;
 
-import android.support.annotation.RequiresPermission;
-
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

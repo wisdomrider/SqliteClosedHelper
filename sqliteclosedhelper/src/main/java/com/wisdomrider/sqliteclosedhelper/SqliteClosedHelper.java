@@ -4,10 +4,8 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
-import android.widget.Toast;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.ParameterizedType;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -47,10 +45,11 @@ public class SqliteClosedHelper implements Interface {
     @Override
     public <T> ArrayList<Method> decompile(T t) {
         ArrayList<Method> methods = new ArrayList<>();
-        ArrayList<Field> fields = new ArrayList<>(Arrays.asList(t.getClass().getDeclaredFields()).subList(0, t.getClass().getDeclaredFields().length - 2));
+
+        ArrayList<Field> fields = new ArrayList<>(Arrays.asList(t.getClass().getDeclaredFields()));
         for (Field f : fields) {
             Method method = new Method(f, t);
-            if (!method.checkAnnotaions(MethodAnnotations.Exclude.class))
+            if (!method.checkAnnotaions(MethodAnnotations.Exclude.class) && !f.getName().equals("$change") && !f.getName().equals("serialVersionUID"))
                 methods.add(method);
         }
         return methods;
@@ -62,6 +61,7 @@ public class SqliteClosedHelper implements Interface {
         ArrayList<Method> methods = decompile(t);
         StringBuilder var_name = new StringBuilder("CREATE TABLE if not exists `" + t.getClass().getSimpleName() + "` (");
         for (Method m : methods) var_name.append(m.getCreateTableQuery());
+        Log.d("QUERY1", var_name.toString());
         var_name = new StringBuilder(var_name.substring(0, var_name.length() - 1) + " )");
         Log.d("QUERY", var_name.toString());
         Query(var_name.toString());
