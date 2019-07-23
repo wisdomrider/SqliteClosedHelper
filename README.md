@@ -17,7 +17,7 @@ Add it in your root build.gradle at the end of repositories:
 Step 2. Add the dependency
 
 	dependencies {
-	        implementation 'com.github.wisdomrider:SqliteClosedHelper:2.5.0'
+	        implementation 'com.github.wisdomrider:SqliteClosedHelper:2.5.2'
 	}
 
 ## How to Use?
