@@ -76,13 +76,13 @@ public class Method<T> {
 
     public String getSqliteType() {
         if (field.getType().equals(Integer.class) || field.getType().equals(int.class)) {
-            return Constants.INTEGER;
+            return SQLITECONSTANTS.INTEGER;
         } else if (field.getType().equals(Double.class) || field.getType().equals(double.class) || field.getType().equals(Float.class) || field.getType().equals(float.class)) {
-            return Constants.REAL;
+            return SQLITECONSTANTS.REAL;
         } else if (field.getType().equals(Long.class) || field.getType().equals(long.class)) {
-            return Constants.NUMERIC;
+            return SQLITECONSTANTS.NUMERIC;
         } else {
-            return Constants.TEXT;
+            return SQLITECONSTANTS.TEXT;
         }
     }
 
@@ -130,13 +130,13 @@ public class Method<T> {
     public String getAnnotations() {
         String annotations = "";
         if (field.isAnnotationPresent(SqliteAnnotations.Primary.class))
-            annotations += " " + Constants.PRIMARY + " ";
+            annotations += " " + SQLITECONSTANTS.PRIMARY + " ";
         if (field.isAnnotationPresent(SqliteAnnotations.Nullable.class) && !field.getAnnotation(SqliteAnnotations.Nullable.class).isNullable())
-            annotations += " " + Constants.NOT_NULLABLE + " ";
+            annotations += " " + SQLITECONSTANTS.NOT_NULLABLE + " ";
         if (field.isAnnotationPresent(SqliteAnnotations.AutoIncrement.class))
-            annotations += " " + Constants.AUTO_INCREMENT + " ";
+            annotations += " " + SQLITECONSTANTS.AUTO_INCREMENT + " ";
         if (field.isAnnotationPresent(SqliteAnnotations.Unique.class))
-            annotations += " " + Constants.UNIQUE + " ";
+            annotations += " " + SQLITECONSTANTS.UNIQUE + " ";
         return annotations;
     }
 

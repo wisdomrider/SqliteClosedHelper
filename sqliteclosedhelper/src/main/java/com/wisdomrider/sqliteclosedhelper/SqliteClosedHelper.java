@@ -45,7 +45,6 @@ public class SqliteClosedHelper implements Interface {
     @Override
     public <T> ArrayList<Method> decompile(T t) {
         ArrayList<Method> methods = new ArrayList<>();
-
         ArrayList<Field> fields = new ArrayList<>(Arrays.asList(t.getClass().getDeclaredFields()));
         for (Field f : fields) {
             Method method = new Method(f, t);
@@ -61,9 +60,7 @@ public class SqliteClosedHelper implements Interface {
         ArrayList<Method> methods = decompile(t);
         StringBuilder var_name = new StringBuilder("CREATE TABLE if not exists `" + t.getClass().getSimpleName() + "` (");
         for (Method m : methods) var_name.append(m.getCreateTableQuery());
-        Log.d("QUERY1", var_name.toString());
         var_name = new StringBuilder(var_name.substring(0, var_name.length() - 1) + " )");
-        Log.d("QUERY", var_name.toString());
         Query(var_name.toString());
         return this;
     }
@@ -81,14 +78,17 @@ public class SqliteClosedHelper implements Interface {
         for (Method m : methods) {
             if (!m.isNull())
                 if (m.isString())
-                    var_name.append("'" + m.getValue() + "' ,");
+                    var_name.append("'" + parseString(m.getValue()) + "' ,");
                 else
                     var_name.append(m.getValue() + ",");
         }
         var_name = new StringBuilder(var_name.substring(0, var_name.length() - 1) + ")");
-        Log.d("QUERY", String.valueOf(var_name));
         database.execSQL(String.valueOf(var_name));
         return this;
+    }
+
+    private String parseString(Object value) {
+        return value.toString().replace("'", "~!/");
     }
 
 
@@ -125,13 +125,70 @@ public class SqliteClosedHelper implements Interface {
 
 
     @Override
+    public <T> SqliteClosedHelper updateTable(T data, T where, String CASE) {
+        ArrayList<Method> methods = decompile(data);
+        StringBuilder primary = new StringBuilder(" WHERE ");
+        StringBuilder var_name = new StringBuilder("UPDATE " + data.getClass().getSimpleName() + " SET ");
+        for (Method m : methods) {
+            String key = "";
+            if (!m.isNull()) {
+                if (m.isString())
+                    key = m.key() + "='" + m.getValue() + "',";
+                else
+                    key += m.key() + "=" + m.getValue() + ",";
+                var_name.append(key);
+            }
+        }
+        for (Method m : decompile(where)) {
+            String key = "";
+            if (!m.isNull()) {
+                if (m.isString())
+                    key = m.key() + "='" + m.getValue() + "' " + CASE;
+                else
+                    key += m.key() + "=" + m.getValue() + " " + CASE;
+                primary.append(key);
+            }
+        }
+
+        Cursor cursor = database.rawQuery("SELECT * FROM " + data.getClass().getSimpleName() + primary.toString().replace(",", ""), null);
+        if (cursor.getCount() == 0) {
+            insertTable(data);
+            return this;
+        }
+        var_name = new StringBuilder(var_name.substring(0, var_name.length() - CASE.length()));
+        primary = new StringBuilder(primary.substring(0, primary.length() - CASE.length()));
+        var_name.append(primary);
+        database.execSQL(String.valueOf(var_name));
+        return this;
+    }
+
+
+    @Override
     public <T> ArrayList<T> whereAND(T t) {
-        return where(t, Constants.AND, 4);
+        return where(t, SQLITECONSTANTS.AND, 4);
+    }
+
+    @Override
+    public <T> SqliteClosedHelper delete(T t, String type) {
+        StringBuilder var_name = new StringBuilder("DELETE FROM " + t.getClass().getSimpleName() + " WHERE ");
+        ArrayList<Method> methods = decompile(t);
+        for (Method m : methods) {
+            if (!m.isNull()) {
+                if (m.isString())
+                    var_name.append(m.key()).append(" = '").append(m.getValue()).append("' ").append(type).append(" ");
+                else
+                    var_name.append(m.key()).append(" = ").append(m.getValue()).append(" ").append(type).append(" ");
+            }
+
+        }
+        var_name = new StringBuilder(var_name.substring(0, var_name.length() - type.length()));
+        database.execSQL(String.valueOf(var_name));
+        return this;
     }
 
     @Override
     public <T> SqliteClosedHelper delete(T t) {
-        String what = Constants.AND;
+        String what = SQLITECONSTANTS.AND;
         StringBuilder var_name = new StringBuilder("DELETE FROM " + t.getClass().getSimpleName() + " WHERE ");
         ArrayList<Method> methods = decompile(t);
         for (Method m : methods) {
@@ -150,7 +207,7 @@ public class SqliteClosedHelper implements Interface {
 
     @Override
     public <T> ArrayList<T> whereOR(T t) {
-        return where(t, Constants.OR, 3);
+        return where(t, SQLITECONSTANTS.OR, 3);
     }
 
     @Override
@@ -212,30 +269,34 @@ public class SqliteClosedHelper implements Interface {
         ArrayList<T> list = new ArrayList<>();
         if (c.getCount() == 0) return list;
         while (c.moveToNext()) {
-            ArrayList<Method> methods;
             try {
-                T table = (T) ((Class) t.getClass()).newInstance();
-                methods = decompile(table);
-            } catch (Exception e) {
-                methods = decompile(t);
-            }
-            int i = 0;
-            for (Method m : methods) { //id cost
-                if (m.getType().equals(String.class)) m.setValue(c.getString(i));
-                else if (m.getType().equals(Integer.class) || m.getType().equals(int.class))
-                    m.setValue(c.getInt(i));
-                else if (m.getType().equals(Double.class) || m.getType().equals(double.class))
-                    m.setValue(c.getDouble(i));
-                else if (m.getType().equals(Float.class) || m.getType().equals(float.class))
-                    m.setValue(c.getFloat(i));
-                else if (m.getType().equals(Long.class) || m.getType().equals(long.class))
-                    m.setValue(c.getLong(i));
-                else if (m.getType().equals(boolean.class) || m.getType().equals(Boolean.class))
-                    m.setValue(Boolean.parseBoolean(c.getString(i)));
-                i++;
+                T tt = (T) t.getClass().newInstance();
+                ArrayList<Method> methods = decompile(tt);
+                int i = 0;
+                for (Method m : methods) {
+                    if (m.getType().equals(String.class))
+                        m.setValue(c.getString(i).replace("~!/", "'"));
+                    else if (m.getType().equals(Integer.class) || m.getType().equals(int.class))
+                        m.setValue(c.getInt(i));
+                    else if (m.getType().equals(Double.class) || m.getType().equals(double.class))
+                        m.setValue(c.getDouble(i));
+                    else if (m.getType().equals(Float.class) || m.getType().equals(float.class))
+                        m.setValue(c.getFloat(i));
+                    else if (m.getType().equals(Long.class) || m.getType().equals(long.class))
+                        m.setValue(c.getLong(i));
+                    else if (m.getType().equals(boolean.class) || m.getType().equals(Boolean.class))
+                        m.setValue(Boolean.parseBoolean(c.getString(i)));
+                    i++;
+
+                }
+                list.add(tt);
+
+            } catch (InstantiationException e) {
+                throw new Error("EMPTY CONSTRUCTOR IS COMPULSARY !", e);
+            } catch (IllegalAccessException e) {
+                throw new Error(e);
             }
 
-            list.add((T) methods.get(0).table);
         }
 
         return list;

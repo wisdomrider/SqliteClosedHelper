@@ -27,7 +27,11 @@ public interface Interface {
 
     <T> SqliteClosedHelper updateTable(T t);
 
+    <T> SqliteClosedHelper updateTable(T data,T condition,String CASE);
+
     <T> ArrayList<T> whereAND(T t);
+
+    <T> SqliteClosedHelper delete(T t,String CASE);
 
     <T> SqliteClosedHelper delete(T t);
 

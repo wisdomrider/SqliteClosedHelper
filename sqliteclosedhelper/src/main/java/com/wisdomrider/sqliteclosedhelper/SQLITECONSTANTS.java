@@ -12,11 +12,9 @@ package com.wisdomrider.sqliteclosedhelper;
 
      Thanks !!
 */
-public class Constants {
+public class SQLITECONSTANTS {
 
     public static final String DEFAULT_ID ="id" ;
-
-
     public static final String INTEGER ="INTEGER" ;
     public static final String REAL ="REAL" ;
     public static final String NUMERIC ="NUMERIC" ;
