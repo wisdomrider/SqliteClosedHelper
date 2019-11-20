@@ -17,7 +17,7 @@ Add it in your root build.gradle at the end of repositories:
 Step 2. Add the dependency
 
 	dependencies {
-	        implementation 'com.github.wisdomrider:SqliteClosedHelper:2.5.2'
+	        implementation 'com.github.wisdomrider:SqliteClosedHelper:2.6.1'
 	}
 
 ## How to Use?
@@ -32,6 +32,7 @@ First Initialize SqliteClosedHelper
   Then Create a Class
   
            public class Book {
+	   	public Book(){} //default no constructor is required
                @SqliteAnnotations.Primary
                @SqliteAnnotations.AutoIncrement
                int bookId; //here bookId is primary key and it increases by +1 everytime
