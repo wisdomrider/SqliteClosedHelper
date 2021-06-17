@@ -126,6 +126,9 @@ public class Method<T> {
             return true;
         return false;
     }
+    public String getAlternative(){
+        return field.getAnnotation(SqliteAnnotations.Alternative.class).field();
+    }
 
     public String getAnnotations() {
         String annotations = "";

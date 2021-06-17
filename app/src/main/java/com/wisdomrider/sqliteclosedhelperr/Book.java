@@ -14,9 +14,18 @@ public class Book {
     float cost; //cost cannot be null
 
 
+    float index;
+
     @MethodAnnotations.Exclude
     ImageView image; //image is excluded from database as this is not a valid data type
 
+    public void setIndex(float index) {
+        this.index = index;
+    }
+
+    public float getIndex() {
+        return index;
+    }
 
     public int getBookId() {
         return bookId;

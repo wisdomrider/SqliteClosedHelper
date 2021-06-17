@@ -13,26 +13,29 @@ import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.widget.Toast
 import com.wisdomrider.sqliteclosedhelper.SQLITECONSTANTS
+import com.wisdomrider.sqliteclosedhelper.SqliteAnnotations
 
 
 class MainActivity : AppCompatActivity() {
 
     class App(var name: String,
               var link: String,
+              var index: String,
+              @SqliteAnnotations.Primary
               var icon: String) {
-        constructor() : this("", "", "")
+        constructor() : this("", "", "","")
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         val helper = SqliteClosedHelper(this, "DBNAME")
-        helper.createTable(App("", "", ""))
+        helper.createTable(App())
         val mainIntent = Intent(Intent.ACTION_MAIN, null)
         mainIntent.addCategory(Intent.CATEGORY_LAUNCHER)
         var apps = getPackageManager().queryIntentActivities(mainIntent, 0)
-        helper.removeAll(App())
-        helper.delete(App(), SQLITECONSTANTS.AND)
+//        helper.removeAll(App())
+//        helper.delete(App(), SQLITECONSTANTS.AND)
         apps.forEachIndexed { index, it ->
             var label = it.activityInfo.loadLabel(packageManager)
             var icon = drawableToBitmap(it.loadIcon(packageManager))!!
@@ -41,14 +44,13 @@ class MainActivity : AppCompatActivity() {
             val ba = bao.toByteArray()
             val ba1 = Base64.encodeToString(ba, Base64.NO_WRAP)
             val item =
-                    App(label.toString().replace("'", "\""), it.activityInfo.applicationInfo.publicSourceDir, ba1)
-            helper.insertTable(item)
+                    App(label.toString(), it.activityInfo.applicationInfo.publicSourceDir,"index'", ba1)
+            helper.updateTable(item)
 
         }
 
-        helper.getAll(App("", "", "")).forEach {
-            Toast.makeText(this@MainActivity, it.name, Toast.LENGTH_SHORT).show()
-        }
+        Toast.makeText(this@MainActivity, helper.getAll(App())[5].name, Toast.LENGTH_SHORT).show()
+
 
     }
 

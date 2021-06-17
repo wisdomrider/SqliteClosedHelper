@@ -21,7 +21,7 @@ public interface Interface {
     <T> ArrayList<Method> decompile(T t);
 
 
-    <T> SqliteClosedHelper createTable(T t);
+    <T> SqliteClosedHelper createTable(T t) throws Exception;
 
     <T> SqliteClosedHelper insertTable(T t);
 

@@ -56,10 +56,15 @@ public class SqliteClosedHelper implements Interface {
 
 
     @Override
-    public <T> SqliteClosedHelper createTable(T t) {
+    public <T> SqliteClosedHelper createTable(T t) throws Exception {
         ArrayList<Method> methods = decompile(t);
         StringBuilder var_name = new StringBuilder("CREATE TABLE if not exists `" + t.getClass().getSimpleName() + "` (");
-        for (Method m : methods) var_name.append(m.getCreateTableQuery());
+        boolean isPrimary = false;
+        for (Method m : methods) {
+            if (m.isPrimary()) isPrimary = m.isPrimary();
+            var_name.append(m.getCreateTableQuery());
+        }
+        if(!isPrimary) throw new Exception("Atleast a primary key is required.");
         var_name = new StringBuilder(var_name.substring(0, var_name.length() - 1) + " )");
         Query(var_name.toString());
         return this;
@@ -71,16 +76,12 @@ public class SqliteClosedHelper implements Interface {
         ArrayList<Method> methods = decompile(t);
         StringBuilder var_name = new StringBuilder("INSERT INTO `" + t.getClass().getSimpleName() + "`(");
         for (Method m : methods) {
-            if (m.getValue() != null)
-                var_name.append("`" + m.key() + "`,");
+            if (m.getValue() != null) var_name.append("`").append(m.key()).append("`,");
         }
         var_name = new StringBuilder(var_name.substring(0, var_name.length() - 1) + ") VALUES (");
         for (Method m : methods) {
-            if (!m.isNull())
-                if (m.isString())
-                    var_name.append("'" + parseString(m.getValue()) + "' ,");
-                else
-                    var_name.append(m.getValue() + ",");
+            if (!m.isNull()) var_name.append("'").append(parseString(m.getValue())).append("' ,");
+
         }
         var_name = new StringBuilder(var_name.substring(0, var_name.length() - 1) + ")");
         database.execSQL(String.valueOf(var_name));
@@ -100,14 +101,10 @@ public class SqliteClosedHelper implements Interface {
         for (Method m : methods) {
             String key = "";
             if (!m.isNull()) {
-                if (m.isString())
-                    key = m.key() + "='" + m.getValue() + "',";
-                else
-                    key += m.key() + "=" + m.getValue() + ",";
+                key = "`" + m.key() + "` = '" + parseString(m.getValue()) + "',";
                 if (!m.isPrimary()) var_name.append(key);
-                else {
-                    primary.append(key);
-                }
+                else primary.append(key);
+
             }
         }
         Cursor cursor = database.rawQuery("SELECT * FROM " + t.getClass().getSimpleName() + primary.toString().replace(",", ""), null);
@@ -132,20 +129,22 @@ public class SqliteClosedHelper implements Interface {
         for (Method m : methods) {
             String key = "";
             if (!m.isNull()) {
-                if (m.isString())
-                    key = m.key() + "='" + m.getValue() + "',";
-                else
-                    key += m.key() + "=" + m.getValue() + ",";
+                key = "`" + m.key() + "` ='" + parseString(m.getValue()) + "',";
+//                if (m.isString())
+//                    key = m.key() + "='" + m.getValue() + "',";
+//                else
+//                    key += m.key() + "=" + m.getValue() + ",";
                 var_name.append(key);
             }
         }
         for (Method m : decompile(where)) {
             String key = "";
             if (!m.isNull()) {
-                if (m.isString())
-                    key = m.key() + "='" + m.getValue() + "' " + CASE;
-                else
-                    key += m.key() + "=" + m.getValue() + " " + CASE;
+                key = "`" + m.key() + "` ='" + parseString(m.getValue()) + "' " + CASE;
+//                if (m.isString())
+//                    key = m.key() + "='" + m.getValue() + "' " + CASE;
+//                else
+//                    key += m.key() + "=" + m.getValue() + " " + CASE;
                 primary.append(key);
             }
         }
@@ -155,7 +154,7 @@ public class SqliteClosedHelper implements Interface {
             insertTable(data);
             return this;
         }
-        var_name = new StringBuilder(var_name.substring(0, var_name.length() - CASE.length()));
+        var_name = new StringBuilder(var_name.substring(0, var_name.length() - 1));
         primary = new StringBuilder(primary.substring(0, primary.length() - CASE.length()));
         var_name.append(primary);
         database.execSQL(String.valueOf(var_name));
@@ -173,12 +172,8 @@ public class SqliteClosedHelper implements Interface {
         StringBuilder var_name = new StringBuilder("DELETE FROM " + t.getClass().getSimpleName() + " WHERE ");
         ArrayList<Method> methods = decompile(t);
         for (Method m : methods) {
-            if (!m.isNull()) {
-                if (m.isString())
-                    var_name.append(m.key()).append(" = '").append(m.getValue()).append("' ").append(type).append(" ");
-                else
-                    var_name.append(m.key()).append(" = ").append(m.getValue()).append(" ").append(type).append(" ");
-            }
+            if (!m.isNull())
+                var_name.append("`").append(m.key()).append("`").append(" = '").append(parseString(m.getValue())).append("'").append(type).append(" ");
 
         }
         var_name = new StringBuilder(var_name.substring(0, var_name.length() - type.length()));
@@ -193,10 +188,12 @@ public class SqliteClosedHelper implements Interface {
         ArrayList<Method> methods = decompile(t);
         for (Method m : methods) {
             if (!m.isNull()) {
-                if (m.isString())
-                    var_name.append(m.key()).append(" = '").append(m.getValue()).append("' ").append(what).append(" ");
-                else
-                    var_name.append(m.key()).append(" = ").append(m.getValue()).append(" ").append(what).append(" ");
+                var_name.append("`").append(m.key()).append("`").append(" = '").append(parseString(m.getValue())).append("'").append(what).append(" ");
+
+//                if (m.isString())
+//                    var_name.append(m.key()).append(" = '").append(m.getValue()).append("' ").append(what).append(" ");
+//                else
+//                    var_name.append(m.key()).append(" = ").append(m.getValue()).append(" ").append(what).append(" ");
             }
 
         }
@@ -252,10 +249,11 @@ public class SqliteClosedHelper implements Interface {
         ArrayList<Method> methods = decompile(t);
         for (Method m : methods) {
             if (!m.isNull()) {
-                if (m.isString())
-                    var_name.append(m.key()).append(" = '").append(m.getValue()).append("' " + what + " ");
-                else
-                    var_name.append(m.key()).append(" = ").append(m.getValue()).append(" " + what + " ");
+                var_name.append("`").append(m.key()).append("`").append(" = '").append(parseString(m.getValue())).append("'").append(what).append(" ");
+//                if (m.isString())
+//                    var_name.append(m.key()).append(" = '").append(m.getValue()).append("' " + what + " ");
+//                else
+//                    var_name.append(m.key()).append(" = ").append(m.getValue()).append(" " + what + " ");
             }
 
         }

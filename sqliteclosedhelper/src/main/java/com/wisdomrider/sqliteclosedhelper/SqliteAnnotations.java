@@ -47,6 +47,12 @@ public @interface SqliteAnnotations {
         boolean isNullable() default true;
     }
 
+    @Documented
+    @Target(ElementType.FIELD)
+    @Retention(RetentionPolicy.RUNTIME)
+    @interface Alternative {
+        String field() default "/++-++/";
+    }
 
 
 }
